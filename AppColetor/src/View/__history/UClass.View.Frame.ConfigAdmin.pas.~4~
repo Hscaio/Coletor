@@ -1,0 +1,50 @@
+unit UClass.View.Frame.ConfigAdmin;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  UClass.Utils.Frame, FMX.Objects, FMX.Layouts, FMX.Edit,
+  FMX.Controls.Presentation;
+
+type
+  TFrameUtil1 = class(TFrameUtil)
+    recFundo: TRectangle;
+    lyMenu: TLayout;
+    imgBack: TImage;
+    lyTop: TLayout;
+    lyHost: TLayout;
+    lbHost: TLabel;
+    lyIP: TLayout;
+    rcIP: TRectangle;
+    edIP: TEdit;
+    lyBot: TLayout;
+    lySalvar: TLayout;
+    rcSalvar: TRectangle;
+    lbSalvar: TLabel;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+var
+  FrameUtil1: TFrameUtil1;
+
+implementation
+
+{$R *.fmx}
+
+uses UClass.Consts.URL;
+
+{ TFrameUtil1 }
+
+constructor TFrameUtil1.Create(AOwner: TComponent);
+begin
+   inherited;
+   edIP.Text := URL_MSCOLETOR;
+end;
+
+end.

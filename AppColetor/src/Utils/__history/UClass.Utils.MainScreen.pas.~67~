@@ -1,0 +1,91 @@
+unit UClass.Utils.MainScreen;
+
+interface
+
+uses
+  System.Classes,
+  System.SysUtils,
+  FMX.TabControl,
+  FMX.Controls,
+  FMX.Forms,
+  FMX.Types;
+
+type
+
+  TMainScreen = class
+  private class var FInstance : TMainScreen;
+  private
+     FMainForm : TCommonCustomForm;
+     FPageControl : TTabControl;
+     FTabItem1 : TTabItem;
+     FTabItem2 : TTabItem;
+     FUseTab1 : Boolean;
+
+     constructor CreatePrivate;
+     procedure SetMainForm(const Value: TCommonCustomForm);
+  public
+     class function GetInstance : TMainScreen;
+     procedure Show<T : TControl>(aObj : T);
+
+     property MainForm : TCommonCustomForm read FMainForm write SetMainForm;
+  end;
+
+implementation
+
+{ TMainScreen }
+
+uses UClass.View.Main;
+
+constructor TMainScreen.CreatePrivate;
+begin
+   FMainForm    := nil;
+
+end;
+
+class function TMainScreen.GetInstance: TMainScreen;
+begin
+   if not Assigned(FInstance) then
+      FInstance := TMainScreen.CreatePrivate;
+
+   Result := FInstance;
+end;
+
+procedure TMainScreen.SetMainForm(const Value: TCommonCustomForm);
+begin
+   FMainForm := Value;
+
+   if Assigned(FPageControl) then
+      FreeAndNil(FPageControl);
+
+   FPageControl := TTabControl.Create(FMainForm);
+
+   FPageControl.Parent := FMainForm;
+   FPageControl.Align := TAlignLayout.Contents;
+
+   FTabItem1    := FPageControl.Add;
+   FTabItem2    := FPageControl.Add;
+   FUseTab1     := True;
+end;
+
+procedure TMainScreen.Show<T>(aObj: T);
+var LTab : TTabItem;
+    LIndex : Integer;
+begin
+   if FUseTab1 then
+      LTab := FTabItem1
+   else
+      LTab := FTabItem2;
+
+   for LIndex := 1 to LTab.ComponentCount - 1 do
+       FreeAndNil(LTab.Components[LIndex]);
+
+   if not Assigned(aObj) then
+      aObj := T.Create(nil);
+   aObj.Parent := LTab;
+   aObj.Align := TAlignLayout.Contents;
+
+   FPageControl.ActiveTab := LTab;
+   FUseTab1 := not FUseTab1;
+end;
+
+end.

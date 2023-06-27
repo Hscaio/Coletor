@@ -1,0 +1,6 @@
+object Coletor: TColetor
+  OldCreateOrder = False
+  DisplayName = 'ColetorUsuario'
+  Height = 150
+  Width = 215
+end

@@ -1,0 +1,48 @@
+unit UClass.View.Frame.PesqColeta;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  UClass.Utils.Frame, Skia, FMX.Objects, FMX.Ani, FMX.Controls.Presentation,
+  Skia.FMX, FMX.Layouts, UClass.View.Frame.ListColeta;
+
+type
+  TFrameUtil1 = class(TFrameUtil)
+    lyMenu: TLayout;
+    recFundoMenu: TRectangle;
+    lyBotMenu: TLayout;
+    SkAnimatedImage1: TSkAnimatedImage;
+    imgConfig: TImage;
+    Label3: TLabel;
+    imgUp: TImage;
+    FloatAnimationMenu: TFloatAnimation;
+    lyClientMenu: TLayout;
+    Layout1: TLayout;
+    lbCriarConta: TLabel;
+    Line1: TLine;
+    Layout2: TLayout;
+    Label1: TLabel;
+    Line2: TLine;
+    Layout3: TLayout;
+    Label2: TLabel;
+    Line3: TLine;
+    lySair: TLayout;
+    lbSair: TLabel;
+    lnSair: TLine;
+    frmListColeta1: TfrmListColeta;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FrameUtil1: TFrameUtil1;
+
+implementation
+
+{$R *.fmx}
+
+end.

@@ -1,0 +1,117 @@
+unit UClass.Utils.Crypt;
+
+interface
+
+uses
+  System.SysUtils;
+
+type
+  ICrypt = interface
+  ['{906CF364-9EA8-495F-81D0-201EDF47ED5C}']
+     function Crypt(aStr : String; aKey : String = '201EDF47ED5C') : String;
+     function Decrypt(aStr : String; aKey : String = '201EDF47ED5C') : String;
+  end;
+
+  TCrypt = class(TInterfacedObject, ICrypt)
+  strict private class var FInstance : ICrypt;
+  private
+     constructor CreatePrivate;
+  public
+     class function GetInstance : ICrypt;
+
+     function Crypt(aStr : String; aKey : String = '201EDF47ED5C') : String;
+     function Decrypt(aStr : String; aKey : String = '201EDF47ED5C') : String;
+  end;
+
+
+implementation
+
+{ TCrypt }
+
+constructor TCrypt.CreatePrivate;
+begin
+
+end;
+
+function TCrypt.Crypt(aStr, aKey: String): String;
+var
+ LKeyLen, LKeyPos, LOffSet, LSrcPos, LSrcAsc, LRange: Integer;
+ LDest: String;
+begin
+  Result := '';
+
+  if aStr = '' Then
+     Exit;
+
+  LDest := '';
+  LKeyLen := Length(aKey);
+  LKeyPos := 0;
+  LRange := 256;
+
+  Randomize;
+  LOffSet := Random(LRange);
+  LDest := Format('%1.2x', [LOffSet]);
+  for LSrcPos := 1 To Length(aStr) Do
+  begin
+    LSrcAsc := (Ord(aStr[LSrcPos]) + LOffSet) Mod 255;
+
+    if LKeyPos < LKeyLen Then
+       LKeyPos := LKeyPos + 1
+    else
+       LKeyPos := 1;
+
+    LSrcAsc := LSrcAsc Xor Ord(aKey[LKeyPos]);
+    LDest := LDest + Format('%1.2x', [LSrcAsc]);
+    LOffSet := LSrcAsc;
+  end;
+
+  Result := LDest;
+end;
+
+function TCrypt.Decrypt(aStr, aKey: String): String;
+var
+ LKeyLen, LKeyPos, LOffSet, LSrcPos, LSrcAsc, LTmpSrcAsc: Integer;
+ LDest: String;
+begin
+   Result := '';
+
+   if aStr = '' Then
+      Exit;
+
+   LDest := '';
+   LKeyLen := Length(aKey);
+   LKeyPos := 0;
+   LOffSet := StrToIntDef('$' + Copy(aStr, 1, 2), 0);
+   LSrcPos := 3;
+   Repeat
+      LSrcAsc := StrToIntDef('$' + Copy(aStr, LSrcPos, 2), 0);
+
+      If (LKeyPos < LKeyLen) Then
+          LKeyPos := LKeyPos + 1
+      Else
+         LKeyPos := 1;
+
+      LTmpSrcAsc := LSrcAsc Xor Ord(aKey[LKeyPos]);
+
+      If LTmpSrcAsc <= LOffSet Then
+         LTmpSrcAsc := 255 + LTmpSrcAsc - LOffSet
+      Else
+         LTmpSrcAsc := LTmpSrcAsc - LOffSet;
+
+      LDest := LDest + Chr(LTmpSrcAsc);
+      LOffSet := LSrcAsc;
+      LSrcPos := LSrcPos + 2;
+   Until (LSrcPos >= Length(aStr));
+
+   Result := LDest;
+end;
+
+class function TCrypt.GetInstance: ICrypt;
+begin
+   if not Assigned(FInstance) then
+      FInstance := TCrypt.CreatePrivate;
+
+   Result := FInstance;
+end;
+
+end.

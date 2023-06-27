@@ -1,0 +1,71 @@
+unit UClass.Client.Base;
+
+interface
+
+uses System.SysUtils,
+     System.JSON,
+     System.Net.HttpClient,
+     System.Net.HttpClientComponent,
+
+     UClass.Consts.URL;
+
+type
+  IClientBase = interface
+  ['{4794AE80-CE54-48B4-A343-ECD3A9E1A58F}']
+     function GetInstance : IClientBase;
+  end;
+
+  TClientBase = class(TInterfacedObject, IClientBase)
+  strict private var FInstance : IClientBase;
+  protected
+      function GetURL(aResorce : String = '') : String;
+     procedure TratarExecption(aResponse : IHTTPResponse);
+
+  private
+     constructor CreatePrivate;
+  public
+     function GetInstance : IClientBase;
+  end;
+
+implementation
+
+{ TClientBase }
+
+constructor TClientBase.CreatePrivate;
+begin
+
+end;
+
+function TClientBase.GetURL(aResorce: String): String;
+begin
+   Result := URL_MSCOLETOR + aResorce;
+end;
+
+procedure TClientBase.TratarExecption(aResponse: IHTTPResponse);
+var LJSON, LJSONMessage : TJSONValue;
+begin
+   if aResponse.StatusCode = 200 then
+      Exit;
+
+   LJSON := TJSONObject.ParseJSONValue(aResponse.ContentAsString);
+   try
+      if not Assigned(LJSON) then
+         raise Exception.Create(aResponse.StatusCode.ToString + ': ' + aResponse.ContentAsString);
+
+      if LJSON.TryGetValue<TJSONValue>('Message',LJSONMessage) then
+         raise Exception.Create(LJSONMessage.ToString);
+   finally
+      if Assigned(LJSON) then
+         FreeAndNil(LJSON);
+   end;
+end;
+
+function TClientBase.GetInstance: IClientBase;
+begin
+   if not Assigned(FInstance) then
+      FInstance := TClientBase.CreatePrivate;
+
+   Result := FInstance;
+end;
+
+end.

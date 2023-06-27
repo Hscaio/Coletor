@@ -1,0 +1,294 @@
+unit UClass.View.Frame.ListColeta;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  UClass.Utils.Frame, FMX.Layouts, FMX.Controls.Presentation, FMX.Objects,
+  FMX.Maps, UClass.Model.Endereco, Skia, Skia.FMX, System.Generics.Collections,
+  UClass.Model.Usuario, UClass.Utils.Cache, UClass.Utils.Notificacao,
+  UClass.Client.Endereco, System.Threading, UClass.Model.SolicitacaoColeta,
+  UClass.Model.Response;
+
+type
+  TfrmListColeta = class(TFrameUtil)
+    lyMaps: TLayout;
+    lyBtnMaps: TLayout;
+    lyRota: TLayout;
+    rcRota: TRectangle;
+    lbRota: TLabel;
+    imRota: TImage;
+    lyCenter: TLayout;
+    rcCenter: TRectangle;
+    lbCenter: TLabel;
+    imCenter: TImage;
+    lyViewMap: TLayout;
+    MapView: TMapView;
+    sbColeta: TScrollBox;
+    Splitter: TSplitter;
+    imResize: TImage;
+    lyNotFound: TLayout;
+    skNotFound: TSkAnimatedImage;
+    Label3: TLabel;
+    Label1: TLabel;
+    lyBtnColetar: TLayout;
+    lyColetar: TLayout;
+    rcColetar: TRectangle;
+    lbColetar: TLabel;
+    imColetar: TImage;
+    lyTopMap: TLayout;
+    lbDescRua: TLabel;
+    lbDescMapa: TLabel;
+    lbRua: TLabel;
+    lbDescNumero: TLabel;
+    lbNumero: TLabel;
+    lbDescBairro: TLabel;
+    lbBairro: TLabel;
+    lbDescComplemento: TLabel;
+    lbComplemento: TLabel;
+    skMap: TSkAnimatedImage;
+    procedure lyCenterClick(Sender: TObject);
+    procedure lyColetarClick(Sender: TObject);
+  private
+    { Private declarations }
+    FLastMapMarker : TMapMarker;
+    FCurrentEndereco : TEndereco;
+    FCurrentItemEnd : TFrameUtil;
+    FListEndereco : TObjectList<TEndereco>;
+    FCodColetor : Integer;
+    procedure SetMarkerInMap;
+    procedure Refresh;
+    procedure AddEndereco(aEndereco : TEndereco);
+    procedure ClearTextEndereco;
+     function ConcluirColeta : Boolean;
+  public
+    { Public declarations }
+     constructor Create(AOwner: TComponent); override;
+     destructor Destroy; override;
+     procedure SelectEndereco(aEndereco : TEndereco = nil; aItemEnd : TFrameUtil = nil);
+  end;
+
+var
+  frmListColeta: TfrmListColeta;
+
+implementation
+
+uses UClass.View.Frame.ItemColetor;
+
+{$R *.fmx}
+
+{ TfrmListColeta }
+
+procedure TfrmListColeta.AddEndereco(aEndereco: TEndereco);
+var LItemEnd : TfrmItemColeta;
+begin
+   LItemEnd := TfrmItemColeta.Create(Self);
+   LItemEnd.Endereco := aEndereco;
+   LItemEnd.OwnerList := Self;
+   LItemEnd.Align := TAlignLayout.Top;
+   LItemEnd.Parent := sbColeta;
+   LItemEnd.Name := 'TfrmItemColeta' + sbColeta.Content.ControlsCount.ToString;
+
+   Refresh;
+end;
+
+procedure TfrmListColeta.ClearTextEndereco;
+begin
+   lbRua.Text         := EmptyStr;
+   lbNumero.Text      := EmptyStr;
+   lbBairro.Text      := EmptyStr;
+   lbComplemento.Text := EmptyStr;
+end;
+
+function TfrmListColeta.ConcluirColeta: Boolean;
+var LResponse : TResponse<TSolicitacaoColeta>;
+begin
+   Result := False;
+
+   try
+      if not Assigned(FCurrentEndereco.SolicitacaoColeta) then
+         raise Exception.Create('Não foi localizado a Solicitação de Coleta do endereço!');
+
+      LResponse := nil;
+      try
+         LResponse := TClientEndereco.GetInstance.ConcluirColeta(FCurrentEndereco.SolicitacaoColeta.Codigo,FCodColetor);
+
+         if LResponse.Status.Code <> 200 then
+            raise Exception.Create(LResponse.Status.Message);
+
+         FCurrentEndereco.SolicitacaoColeta.Status  := sscConcluido;
+         FCurrentEndereco.SolicitacaoColeta.Coletor := FCodColetor;
+
+         TThread.Synchronize(TThread.CurrentThread,
+            procedure
+            begin
+               SelectEndereco;
+               if Assigned(FCurrentItemEnd) then
+                  FCurrentItemEnd.Visible := False;
+               FListEndereco.Remove(FCurrentEndereco);
+               Refresh;
+            end
+         );
+
+
+         Result := True;
+      finally
+         if Assigned(LResponse) then
+            FreeAndNil(LResponse);
+      end;
+   except on E: Exception do
+      begin
+         TThread.Synchronize(TThread.CurrentThread,
+            procedure
+            begin
+               TDialoger.GetInstance.ShowMessage(E.Message,mtError);
+            end
+         );
+      end;
+   end;
+end;
+
+constructor TfrmListColeta.Create(AOwner: TComponent);
+var LUsuario : TUsuario;
+    LEndereco : TEndereco;
+begin
+   inherited;
+   TDialoger.GetInstance.MapView := MapView;
+   FLastMapMarker := nil;
+   FCurrentEndereco := nil;
+   SelectEndereco;
+
+   try
+      FListEndereco := TObjectList<TEndereco>(TCache.GetInstance.Get(chListaEndereco));
+
+      LUsuario := TUsuario(TCache.GetInstance.Get(chUsuario));
+      if not Assigned(LUsuario) then
+         raise Exception.Create('Não foi localizado os dados do usuário para buscar os endereços!');
+
+      FCodColetor := LUsuario.Codigo;
+
+      if not Assigned(FListEndereco) then
+      begin
+         FListEndereco := TClientEndereco.GetInstance.ColetasDoUsuario(FCodColetor);
+         TCache.GetInstance.Add(chListaEndereco,FListEndereco);
+      end;
+
+      for LEndereco in FListEndereco do
+          AddEndereco(LEndereco);
+
+      Refresh;
+   except on E: Exception do
+      begin
+         TThread.Synchronize(TThread.CurrentThread,
+            procedure
+            begin
+               lyNotFound.Visible := True;
+               TDialoger.GetInstance.ShowMessage(E.Message);
+            end
+         );
+      end;
+   end;
+end;
+
+destructor TfrmListColeta.Destroy;
+begin
+   TDialoger.GetInstance.MapView := nil;
+   inherited;
+end;
+
+procedure TfrmListColeta.lyCenterClick(Sender: TObject);
+begin
+   inherited;
+   SetMarkerInMap;
+end;
+
+procedure TfrmListColeta.lyColetarClick(Sender: TObject);
+begin
+   inherited;
+   if not Assigned(FCurrentEndereco) then
+   begin
+      TDialoger.
+         GetInstance.
+            ShowMessage(
+               'Não há endereço selecionado!'+sLineBreak+
+               'Selecione um endereço para realizar a coleta.'
+            );
+      Exit;
+   end;
+   
+   TDialoger.
+      GetInstance.
+         ShowMessage(
+            'Deseja marcar o material do endereço selecionado como coletado?',
+            mtConfirmation,
+            procedure(aResponse : TMessageResponse)
+            var LTask : ITask;
+            begin
+               if aResponse <> TMessageResponse.mrYes then
+                  Exit;
+
+               LTask := TTask.Run(
+                  procedure
+                  begin
+                     if not ConcluirColeta then
+                        Exit;
+
+                     TThread.Synchronize(TThread.CurrentThread,
+                        procedure
+                        begin
+                           TDialoger.GetInstance.ToastMessage('Coleta concluida com Sucesso!');
+                        end
+                     );
+                  end
+               );
+            end
+         );
+end;
+
+procedure TfrmListColeta.Refresh;
+begin
+   lyNotFound.Visible := FListEndereco.Count = 0;
+end;
+
+procedure TfrmListColeta.SelectEndereco(aEndereco : TEndereco; aItemEnd : TFrameUtil);
+begin
+   FCurrentEndereco := aEndereco;
+   FCurrentItemEnd  := aItemEnd;
+
+   if not Assigned(FCurrentEndereco) then
+      ClearTextEndereco
+   else
+   begin
+      lbRua.Text         := FCurrentEndereco.Endereco;
+      lbNumero.Text      := FCurrentEndereco.Numero;
+      lbBairro.Text      := FCurrentEndereco.Bairro;
+      lbComplemento.Text := FCurrentEndereco.Complemento;
+   end;
+
+   SetMarkerInMap;
+end;
+
+procedure TfrmListColeta.SetMarkerInMap;
+var LMarker : TMapMarkerDescriptor;
+    LLocation : TMapCoordinate;
+begin
+   if Assigned(FLastMapMarker) then
+      FreeAndNil(FLastMapMarker);
+
+   if not Assigned(FCurrentEndereco) then
+   begin
+      MapView.Visible := False;
+      Exit;
+   end;
+
+   MapView.Visible     := True;
+   LLocation.Latitude  := FCurrentEndereco.Lat;
+   LLocation.Longitude := FCurrentEndereco.Long;
+   LMarker := TMapMarkerDescriptor.Create(LLocation,'Local de Coleta');
+   FLastMapMarker := MapView.AddMarker(LMarker);
+   MapView.Location := LLocation;
+   MapView.Zoom := 15;
+end;
+
+end.

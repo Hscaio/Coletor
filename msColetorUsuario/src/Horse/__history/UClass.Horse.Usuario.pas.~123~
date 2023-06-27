@@ -1,0 +1,94 @@
+unit UClass.Horse.Usuario;
+
+interface
+
+uses System.SysUtils,
+     System.JSON,
+
+     UClass.Utils.Crypt,
+
+     Horse,
+     Horse.Jhonson,
+
+     UClass.Horse.Base,
+     UClass.Model.Usuario,
+     UClass.Controller.Usuario;
+
+type
+
+   THorseUsuario = class(THorseBase)
+   private
+      class procedure NovoUsuario(aReq: THorseRequest; aRes: THorseResponse);
+      class procedure AutenticarUsuario(aReq: THorseRequest; aRes: THorseResponse);
+   public
+      class procedure Registering; override;
+   end;
+
+implementation
+
+{ THorseUsuario }
+
+class procedure THorseUsuario.AutenticarUsuario(aReq: THorseRequest;
+  aRes: THorseResponse);
+var LController : IControllerUsuario;
+    LLogin, LSenha : String;
+    LUsuario : TUsuario;
+begin
+   try
+      LLogin := TCrypt.GetInstance.Decrypt(aReq.Params.Field('LOGIN').AsString);
+      LSenha := TCrypt.GetInstance.Decrypt(aReq.Params.Field('SENHA').AsString);
+
+      LController := TControllerUsuario.Create;
+      LUsuario := nil;
+      try
+         LUsuario := LController.AutenticarUsuario(LLogin, LSenha);
+         aRes.Status(200);
+
+         if LValido then
+            aRes.Send<TJSONValue>(CreateStatusResponse(200,'Usuário autenticado com sucesso!'))
+         else
+            aRes.Send<TJSONValue>(CreateStatusResponse(401,'Usuário não é válido!'))
+      finally
+
+      end;
+   except on E: Exception do
+      begin
+         aRes.Status(500);
+         aRes.Send<TJSONObject>(CreateStatusResponse(500,E.Message));
+      end;
+   end;
+end;
+
+class procedure THorseUsuario.NovoUsuario(aReq: THorseRequest;
+  aRes: THorseResponse);
+var LController : IControllerUsuario;
+    LUsuario    : TUsuario;
+begin
+   try
+      LController := TControllerUsuario.Create;
+      LUsuario    := TUsuario.Create;
+      try
+         LUsuario.JSONToObject(aReq.Body<TJSONObject>);
+         LController.NovoUsuario(LUsuario);
+
+         aRes.Status(200);
+         aRes.Send<TJSONValue>(CreateStatusResponse(200,'Usuário adicionado com sucesso!',LUsuario));
+      finally
+         FreeAndNil(LUsuario);
+      end;
+   except on E: Exception do
+      begin
+         aRes.Status(500);
+         aRes.Send<TJSONObject>(CreateStatusResponse(500,E.Message));
+      end;
+   end;
+end;
+
+class procedure THorseUsuario.Registering;
+begin
+   inherited;
+   THorse.Get('/AutenticarUsuario/:LOGIN/:SENHA',AutenticarUsuario);
+   THorse.Post('/NovoUsuario',NovoUsuario);
+end;
+
+end.

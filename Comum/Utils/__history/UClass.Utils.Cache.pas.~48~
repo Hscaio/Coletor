@@ -1,0 +1,91 @@
+unit UClass.Utils.Cache;
+
+interface
+
+uses
+  System.Classes,
+  System.SysUtils,
+  System.Generics.Collections;
+
+type
+  TTpCache = (chUsuario, chListaEndereco);
+
+  TCache = class
+  private class var FInstance : TCache;
+  private
+     FDic : TObjectDictionary<String,TObject>;
+
+     constructor CreatePrivate;
+  public
+     destructor Destroy; override;
+     class function GetInstance : TCache;
+
+     procedure Add(aKey : String; aObj : TObject); overload;
+     procedure Remove(aKey : String); overload;
+      function Get<T : constructor>(aKey : String) : T; overload;
+
+     procedure Add(aKey : TTpCache; aObj : TObject); overload;
+     procedure Remove(aKey : TTpCache); overload;
+      function Get<T : constructor>(aKey : TTpCache) : T; overload;
+  end;
+
+const ConstTpCache : array[TTpCache] of String = ('USUARIO','LIST-END');
+
+implementation
+
+{ TCache }
+
+procedure TCache.Add(aKey: String; aObj: TObject);
+begin
+   FDic.AddOrSetValue(aKey,aObj);
+end;
+
+procedure TCache.Add(aKey: TTpCache; aObj: TObject);
+begin
+   Add(ConstTpCache[aKey],aObj);
+end;
+
+constructor TCache.CreatePrivate;
+begin
+   FDic := TObjectDictionary<String,TObject>.Create([doOwnsValues]);
+end;
+
+destructor TCache.Destroy;
+begin
+   FreeAndNil(FDic);
+   inherited;
+end;
+
+function TCache.Get<T>(aKey: String): T;
+var LTemp : TObject;
+begin
+   if not FDic.TryGetValue(aKey,LTemp) then
+      Result := nil
+   else
+      Result := T(LTemp);
+end;
+
+function TCache.Get<T>(aKey: TTpCache): T;
+begin
+   Result := Get<T>(ConstTpCache[aKey]);
+end;
+
+class function TCache.GetInstance: TCache;
+begin
+   if not Assigned(FInstance) then
+      FInstance := TCache.CreatePrivate;
+
+   Result := FInstance;
+end;
+
+procedure TCache.Remove(aKey: TTpCache);
+begin
+   Remove(ConstTpCache[aKey]);
+end;
+
+procedure TCache.Remove(aKey: String);
+begin
+   FDic.Remove(aKey);
+end;
+
+end.

@@ -1,0 +1,57 @@
+unit UClass.Consts.Login;
+
+interface
+
+uses
+  System.Classes,
+  System.SysUtils,
+  System.IOUtils,
+  UClass.Utils.Crypt;
+
+procedure SaveLogin(aUsuario : String; aSenha : String);
+function LoadLogin(out aUsuario : String; out aSenha : String) : Boolean;
+procedure DeleteLogin;
+
+implementation
+
+procedure SaveLogin(aUsuario : String; aSenha : String);
+var LStrList : TStringList;
+begin
+   LStrList := TStringList.Create;
+   try
+      LStrList.Values['U'] := TCrypt.GetInstance.Crypt(aUsuario,'980E16F2A184');
+      LStrList.Values['S'] := TCrypt.GetInstance.Crypt(aSenha,'980E16F2A184');
+      LStrList.SaveToFile(TPath.GetCachePath + '\CLT-P.txt');
+   finally
+      FreeAndNil(LStrList);
+   end;
+end;
+
+function LoadLogin(out aUsuario : String; out aSenha : String) : Boolean;
+var LStrList : TStringList;
+begin
+   if not FileExists(TPath.GetCachePath + '\CLT-P.txt') then
+      Exit(False);
+
+   LStrList := TStringList.Create;
+   try
+      LStrList.LoadFromFile(TPath.GetCachePath + '\CLT-P.txt');
+      aUsuario := TCrypt.GetInstance.Decrypt(LStrList.Values['U'],'980E16F2A184');
+      aSenha   := TCrypt.GetInstance.Decrypt(LStrList.Values['S'],'980E16F2A184');
+
+      Result := (not aUsuario.IsEmpty) and (not aSenha.IsEmpty);
+   finally
+      FreeAndNil(LStrList);
+   end;
+end;
+
+procedure DeleteLogin;
+begin
+   if FileExists(TPath.GetCachePath + '\CLT-P.txt') then
+      DeleteFile(TPath.GetCachePath + '\CLT-P.txt');
+end;
+
+initialization
+   if not DirectoryExists(TPath.GetCachePath + '\Coletor') then
+
+end.

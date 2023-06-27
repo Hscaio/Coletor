@@ -1,0 +1,6 @@
+object msColetorUsuario: TmsColetorUsuario
+  OldCreateOrder = False
+  DisplayName = 'msColetorUsuario'
+  Height = 150
+  Width = 215
+end

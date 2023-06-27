@@ -1,0 +1,164 @@
+unit UClass.View.Frame.Login;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  FMX.Objects, FMX.Controls.Presentation, FMX.Edit, FMX.Layouts,
+  UClass.Model.Response, UClass.Model.Usuario, UClass.Consts.Login;
+
+type
+  TfrmLogin = class(TFrame)
+    lySenha: TLayout;
+    rcSenha: TRectangle;
+    edSenha: TEdit;
+    lyAcessar: TLayout;
+    rcAcessar: TRectangle;
+    lbAcessar: TLabel;
+    lyCriarConta: TLayout;
+    rcCriarConta: TRectangle;
+    lbCriarConta: TLabel;
+    lyEsqueciSenha: TLayout;
+    lbEsqueciSenha: TLabel;
+    lyMenu: TLayout;
+    imgBack: TImage;
+    recFundoLogin: TRectangle;
+    lyTop: TLayout;
+    lyEntrar: TLayout;
+    lbEntrar: TLabel;
+    lyEmail: TLayout;
+    rcEmail: TRectangle;
+    edEmail: TEdit;
+    lyBot: TLayout;
+    procedure lyCriarContaClick(Sender: TObject);
+    procedure imgBackClick(Sender: TObject);
+    procedure lyAcessarClick(Sender: TObject);
+  private
+    { Private declarations }
+    FTipoUsu : TTipoUsuario;
+    function AutenticarUsuario : Boolean;
+    procedure SetSenha(const Value: String);
+    procedure SetUsuario(const Value: String);
+  public
+    { Public declarations }
+    procedure Acessar;
+
+    property Usuario : String write SetUsuario;
+    property Senha : String write SetSenha;
+    property TipoUsu : TTipoUsuario read FTipoUsu write FTipoUsu;
+
+  end;
+
+implementation
+
+{$R *.fmx}
+
+uses System.Threading,
+     System.Hash,
+     UClass.Utils.MainScreen,
+     UClass.View.Frame.Menu,
+     UClass.View.Frame.CriarConta,
+     UClass.Utils.Notificacao, UClass.Client.Usuario,
+     UClass.View.Frame.PesqEndereco, UClass.Utils.Cache;
+
+procedure TfrmLogin.Acessar;
+var LTask : ITask;
+begin
+   inherited;
+
+   if edEmail.Text.IsEmpty or edSenha.Text.IsEmpty then
+   begin
+      TDialoger.GetInstance.ShowMessage('Informe os dados necessários para Acessar o sistema!');
+      Exit;
+   end;
+
+   TDialoger.GetInstance.ShowLoad;
+   LTask := TTask.Run(
+      procedure
+      begin
+         try
+            if not AutenticarUsuario then
+               Exit;
+
+            SaveLogin(edEmail.Text,edSenha.Text);
+
+            TThread.Synchronize(TThread.CurrentThread,
+               procedure
+               begin
+                  TMainScreen.GetInstance.Show<TfrmPesqEndereco>(nil);
+               end
+            );
+         finally
+            TThread.Synchronize(TThread.CurrentThread,
+               procedure
+               begin
+                  TDialoger.GetInstance.HideLoad;
+               end
+            );
+         end;
+      end
+   );
+end;
+
+function TfrmLogin.AutenticarUsuario: Boolean;
+var LUsuario : TResponse<TUsuario>;
+begin
+   Result := False;
+
+   try
+      LUsuario := TClientUsuario.GetInstance.AutenticarUsuario(edEmail.Text,THashSHA1.GetHashString(edSenha.Text));
+      try
+         if LUsuario.Status.Code <> 200 then
+            TDialoger.GetInstance.ShowMessage('E-mail/CPF ou Senha inválida!')
+         else
+         begin
+            Result := True;
+            TCache.GetInstance.Add('USUARIO',LUsuario.Data);
+            FTipoUsu := LUsuario.Data.Tipo;
+         end;
+      finally
+         if Assigned(LUsuario) then
+            FreeAndNil(LUsuario);
+      end;
+
+   except on E: Exception do
+      begin
+         TThread.Synchronize(TThread.CurrentThread,
+            procedure
+            begin
+               TDialoger.GetInstance.ShowMessage(E.Message,mtError);
+            end
+         );
+      end;
+   end;
+end;
+
+procedure TfrmLogin.imgBackClick(Sender: TObject);
+begin
+   TMainScreen.GetInstance.Show<TfrmMenu>(nil);
+end;
+
+procedure TfrmLogin.lyAcessarClick(Sender: TObject);
+begin
+   Acessar;
+end;
+
+procedure TfrmLogin.lyCriarContaClick(Sender: TObject);
+var LfrmCriarConta : TfrmCriarConta;
+begin
+   LfrmCriarConta := TfrmCriarConta.Create(nil);
+   TMainScreen.GetInstance.Show<TfrmCriarConta>(nil);
+end;
+
+procedure TfrmLogin.SetSenha(const Value: String);
+begin
+   edSenha.Text := Value;
+end;
+
+procedure TfrmLogin.SetUsuario(const Value: String);
+begin
+   edEmail.Text := Value;
+end;
+
+end.

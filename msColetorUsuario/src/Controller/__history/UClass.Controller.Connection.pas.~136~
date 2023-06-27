@@ -1,0 +1,246 @@
+unit UClass.Controller.Connection;
+
+interface
+
+uses
+   System.SysUtils,
+   UClass.Controller.Config,
+
+   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
+   FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async,
+   FireDAC.Phys, FireDAC.VCLUI.Wait, Data.DB, FireDAC.Comp.Client, FireDAC.Phys.IBBase,
+   FireDAC.Phys.FB, FireDAC.DApt;
+
+const
+   SQL_HAS_TABLE = 'SELECT FIRST 1 1                  '+
+                   '  FROM RDB$RELATIONS              '+
+                   ' WHERE RDB$RELATION_NAME = :TABLE ';
+
+   SQL_HAS_FIELD = 'SELECT B.RDB$FIELD_TYPE,                                          '+
+                   '       B.RDB$FIELD_LENGTH                                         '+
+                   '  FROM RDB$RELATION_FIELDS A                                      '+
+                   ' INNER JOIN RDB$FIELDS B ON A.RDB$FIELD_SOURCE = B.RDB$FIELD_NAME '+
+                   ' WHERE A.RDB$RELATION_NAME = :TABLE                               '+
+                   '   AND A.RDB$FIELD_NAME = :FIELD                                  ';
+
+   SQL_HAS_GENERETOR = 'SELECT FIRST 1 1                  '+
+                       '  FROM RDB$GENERATORS             '+
+                       ' WHERE RDB$GENERATOR_NAME = :NAME ';
+
+   SQL_CREATE_GENERATOR = 'CREATE GENERATOR %S';
+
+   SQL_ALTER_SIZE = 'ALTER TABLE %S ALTER %S TYPE VARCHAR(%D)';
+
+   TYPE_VARCHAR = 37;
+
+type
+   IConnection = interface
+      function NewConnection : TFDConnection;
+      function NewTransaction(aConnection : TFDConnection = nil) : TFDTransaction;
+      function NewQuery(aTransaction : TFDTransaction = nil) : TFDQuery;
+
+      function CreateTable(aTable : String; aSQL : String) : Boolean;
+      function CreateField(aTable : String; aField : String; aVarCharSize : Integer; aSQL : String) : Boolean; overload;
+      function CreateField(aTable : String; aField : String; aSQL : String) : Boolean; overload;
+      function CreateGenretor(aName : String) : Boolean; overload;
+   end;
+
+   TConnection = class(TInterfacedObject, IConnection)
+   strict private class var
+      FInstance : IConnection;
+   private
+      FDriver : TFDPhysFBDriverLink;
+
+      constructor CreatePrivate();
+   public
+      destructor Destroy; override;
+      class function GetInstance : IConnection;
+
+      function NewConnection : TFDConnection;
+      function NewTransaction(aConnection : TFDConnection = nil) : TFDTransaction;
+      function NewQuery(aTransaction : TFDTransaction = nil) : TFDQuery;
+
+      function CreateTable(aTable : String; aSQL : String) : Boolean;
+      function CreateField(aTable : String; aField : String; aVarCharSize : Integer; aSQL : String) : Boolean; overload;
+      function CreateField(aTable : String; aField : String; aSQL : String) : Boolean; overload;
+      function CreateGenretor(aName : String) : Boolean; overload;
+   end;
+
+implementation
+
+{ TConnection }
+
+function TConnection.CreateField(aTable, aField: String; aVarCharSize: Integer;
+  aSQL: String): Boolean;
+var LQuery : TFDQuery;
+begin
+   Result := False;
+
+   LQuery := NewQuery;
+   try
+      LQuery.Open(SQL_HAS_FIELD, [aTable, aField]);
+
+      try
+         if LQuery.IsEmpty then
+         begin
+            LQuery.ExecSQL(aSQL);
+            Result := True;
+         end
+         else
+         if (LQuery.FieldByName('RDB$FIELD_TYPE').AsInteger = TYPE_VARCHAR) and
+            (aVarCharSize > 0) and
+            (LQuery.FieldByName('RDB$FIELD_LENGTH').AsInteger < aVarCharSize) then
+         begin
+            LQuery.ExecSQL(Format(SQL_ALTER_SIZE,[aTable,aField,aVarCharSize]));
+            Result := True;
+         end;
+
+         if Result then
+            LQuery.Transaction.Commit;
+
+      except on E: Exception do
+         begin
+            if Result then
+               LQuery.Transaction.Rollback;
+
+            raise Exception.CreateFmt('Erro ao criar campo %s para tabela %s : %s', [aField, aTable, E.Message]);
+         end;
+      end;
+
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+function TConnection.CreateField(aTable, aField, aSQL: String): Boolean;
+begin
+   Result := CreateField(aTable, aField, 0, aSQL);
+end;
+
+function TConnection.CreateGenretor(aName: String): Boolean;
+var LQuery : TFDQuery;
+begin
+   Result := False;
+
+   LQuery := NewQuery;
+   try
+      LQuery.Open(SQL_HAS_GENERETOR, [aName]);
+
+      if not LQuery.IsEmpty then
+         Exit;
+
+      try
+         LQuery.ExecSQL(Format(SQL_CREATE_GENERATOR,[aName]));
+         Result := True;
+
+         LQuery.Transaction.Commit;
+      except on E: Exception do
+         begin
+            LQuery.Transaction.Rollback;
+            raise Exception.CreateFmt('Erro ao criar Generator %s : %s', [aName, E.Message]);
+         end;
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+constructor TConnection.CreatePrivate;
+begin
+   FDriver := TFDPhysFBDriverLink.Create(nil);
+end;
+
+function TConnection.CreateTable(aTable, aSQL: String): Boolean;
+var LQuery : TFDQuery;
+begin
+   Result := False;
+
+   LQuery := NewQuery;
+   try
+      LQuery.Open(SQL_HAS_TABLE, [aTable]);
+
+      if not LQuery.IsEmpty then
+         Exit;
+      try
+         LQuery.ExecSQL(aSQL);
+         Result := True;
+
+         LQuery.Transaction.Commit;
+      except on E: Exception do
+         begin
+            LQuery.Transaction.Rollback;
+            raise Exception.CreateFmt('Erro ao criar tabela %s : %s', [aTable, E.Message]);
+         end;
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+destructor TConnection.Destroy;
+begin
+   FreeAndNil(FDriver);
+   inherited;
+end;
+
+class function TConnection.GetInstance: IConnection;
+begin
+   if not Assigned(FInstance) then
+      FInstance := TConnection.CreatePrivate;
+
+   Result := FInstance;
+end;
+
+function TConnection.NewConnection: TFDConnection;
+begin
+   Result := TFDConnection.Create(nil);
+
+   try
+      Result.Params.Clear;
+
+      with TConfiguration.GetInstance do
+      begin
+         Result.Params.Add('DriverID=FB');
+         Result.Params.Add('Database='+DataBase);
+         Result.Params.Add('Password='+PasswordDB);
+         Result.Params.Add('User_Name='+UserDB);
+         Result.TxOptions.AutoCommit := False;
+         Result.Open();
+      end;
+   except on E: Exception do
+      raise Exception.Create('Erro ao criar nova conexão com o Bando de Dados: ' + E.Message);
+   end;
+end;
+
+function TConnection.NewQuery(aTransaction : TFDTransaction = nil): TFDQuery;
+begin
+   try
+      Result := TFDQuery.Create(nil);
+
+      if not Assigned(aTransaction) then
+         aTransaction := NewTransaction;
+
+      Result.Transaction := aTransaction;
+      Result.Connection  := aTransaction.Connection;
+   except on E: Exception do
+      raise Exception.Create('Erro ao criar nova Query: ' + E.Message);
+   end;
+end;
+
+function TConnection.NewTransaction(aConnection: TFDConnection): TFDTransaction;
+begin
+   try
+      Result := TFDTransaction.Create(nil);
+
+      if not Assigned(aConnection) then
+         aConnection := NewConnection;
+
+      Result.Connection := aConnection;
+      Result.StartTransaction;
+   except on E: Exception do
+      raise Exception.Create('Erro ao criar nova Transaction: ' + E.Message);
+   end;
+
+end;
+
+end.

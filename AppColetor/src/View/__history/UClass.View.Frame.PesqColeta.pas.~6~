@@ -1,0 +1,78 @@
+unit UClass.View.Frame.PesqColeta;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  UClass.Utils.Frame, Skia, FMX.Objects, FMX.Ani, FMX.Controls.Presentation,
+  Skia.FMX, FMX.Layouts, UClass.View.Frame.ListColeta;
+
+type
+  TfrmPesqColeta = class(TFrameUtil)
+    lyMenu: TLayout;
+    recFundoMenu: TRectangle;
+    lyBotMenu: TLayout;
+    SkAnimatedImage1: TSkAnimatedImage;
+    imgConfig: TImage;
+    Label3: TLabel;
+    imgUp: TImage;
+    FloatAnimationMenu: TFloatAnimation;
+    lyClientMenu: TLayout;
+    Layout1: TLayout;
+    lbCriarConta: TLabel;
+    Line1: TLine;
+    Layout2: TLayout;
+    Label1: TLabel;
+    Line2: TLine;
+    Layout3: TLayout;
+    Label2: TLabel;
+    Line3: TLine;
+    lySair: TLayout;
+    lbSair: TLabel;
+    lnSair: TLine;
+    frmListColeta1: TfrmListColeta;
+    rcFundo: TRectangle;
+    procedure lyBotMenuClick(Sender: TObject);
+  private
+    { Private declarations }
+    procedure UpdateImgMenu;
+  public
+    { Public declarations }
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+var
+  frmPesqColeta: TfrmPesqColeta;
+
+implementation
+
+{$R *.fmx}
+
+{ TfrmPesqColeta }
+
+constructor TfrmPesqColeta.Create(AOwner: TComponent);
+begin
+  inherited;
+   FloatAnimationMenu.StartValue := 0;
+   FloatAnimationMenu.StopValue  := (lyMenu.Height - lyBotMenu.Height) * -1;
+
+   lyMenu.Position.Y := FloatAnimationMenu.StopValue;
+   UpdateImgMenu;
+end;
+
+procedure TfrmPesqColeta.lyBotMenuClick(Sender: TObject);
+begin
+  inherited;
+   FloatAnimationMenu.Inverse := not FloatAnimationMenu.Inverse;
+   FloatAnimationMenu.Start;
+   UpdateImgMenu;
+end;
+
+procedure TfrmPesqColeta.UpdateImgMenu;
+begin
+   imgConfig.Visible := not FloatAnimationMenu.Inverse;
+   imgUp.Visible     := FloatAnimationMenu.Inverse;
+end;
+
+end.

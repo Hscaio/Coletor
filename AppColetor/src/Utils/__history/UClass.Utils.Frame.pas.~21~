@@ -1,0 +1,86 @@
+unit UClass.Utils.Frame;
+
+interface
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  FMX.Objects, FMX.Layouts, FMX.Controls.Presentation, FMX.Edit, FMX.ListBox,
+  FMX.TabControl;
+
+type
+  TFrameUtil = class(TFrame)
+  private
+    FTabControlProx : TTabControl;
+    FTabItemProx : TTabItem;
+    FTabControlAnt : TTabControl;
+    FTabItemAnt : TTabItem;
+  protected
+    procedure ProximoTab;
+    procedure AnteriorTab;
+
+     function CampoIsEmpty(aEdit : TEdit; aFundo : TRectangle) : Boolean;
+    procedure CampoInvalido(aEdit : TEdit; aFundo : TRectangle; aValido : Boolean = False);
+  public
+     constructor Create(AOwner: TComponent); override;
+
+     procedure SetProximaTab(aTabControl : TTabControl; aTabItem : TTabItem);
+     procedure SetAnteriorTab(aTabControl : TTabControl; aTabItem : TTabItem);
+  end;
+
+implementation
+
+{ TFrameUtil }
+
+procedure TFrameUtil.AnteriorTab;
+begin
+   if Assigned(FTabControlAnt) and Assigned(FTabItemAnt) then
+      FTabControlAnt.ActiveTab := FTabItemAnt;
+end;
+
+procedure TFrameUtil.CampoInvalido(aEdit: TEdit; aFundo: TRectangle;
+  aValido: Boolean);
+begin
+  aFundo.Stroke.Color := TAlphaColorRec.Red;
+
+  if aValido then
+     aFundo.Stroke.Kind := TBrushKind.None
+  else
+     aFundo.Stroke.Kind := TBrushKind.Solid;
+end;
+
+function TFrameUtil.CampoIsEmpty(aEdit: TEdit; aFundo: TRectangle): Boolean;
+begin
+  Result := aEdit.Text.IsEmpty;
+  CampoInvalido(aEdit, aFundo, not Result);
+end;
+
+constructor TFrameUtil.Create(AOwner: TComponent);
+begin
+   inherited;
+   FTabControlProx := nil;
+   FTabItemProx    := nil;
+   FTabControlAnt  := nil;
+   FTabItemAnt     := nil;
+end;
+
+procedure TFrameUtil.ProximoTab;
+begin
+   if Assigned(FTabControlProx) and Assigned(FTabItemProx) then
+      FTabControlProx.ActiveTab := FTabItemProx;
+end;
+
+procedure TFrameUtil.SetAnteriorTab(aTabControl: TTabControl;
+  aTabItem: TTabItem);
+begin
+   FTabControlAnt := aTabControl;
+   FTabItemAnt    := aTabItem;
+end;
+
+procedure TFrameUtil.SetProximaTab(aTabControl: TTabControl;
+  aTabItem: TTabItem);
+begin
+   FTabControlProx := aTabControl;
+   FTabItemProx    := aTabItem;
+end;
+
+end.

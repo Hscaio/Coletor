@@ -1,0 +1,50 @@
+unit UClass.Model.Response;
+
+interface
+
+uses System.SysUtils,
+     System.JSON,
+     UClass.Model.Base,
+     UClass.Model.StatusResponse;
+
+type
+   TResponse<T : constructor, TModelBase> = class(TModelBase)
+   private
+      FData   : T;
+      FStatus : TStatusResponse;
+   public
+      property Data   : T read FData write FData;
+      property Status : TStatusResponse read FStatus write FStatus;
+
+      function ObjectToJSON : TJSONObject; override;
+      procedure JSONToObject(aJSON : TJSONObject); override;
+   end;
+
+implementation
+
+{ TResponse<T> }
+
+procedure TResponse<T>.JSONToObject(aJSON: TJSONObject);
+begin
+   inherited;
+   if aJSON.HasValue('Data') then
+   
+   FData := T.Create;
+   FData.JSONToObject(TJSONObject(aJSON.GetValue('Data')));
+
+   FStatus := TStatusResponse.Create;
+   FStatus.JSONToObject(TJSONObject(aJSON.GetValue('Status')));
+end;
+
+function TResponse<T>.ObjectToJSON: TJSONObject;
+begin
+   Result := TJSONObject.Create;
+
+   if Assigned(FData) then
+      Result.AddPair('Data',FData.ObjectToJSON);
+
+   if Assigned(FStatus) then
+      Result.AddPair('Status',FStatus.ObjectToJSON);
+end;
+
+end.

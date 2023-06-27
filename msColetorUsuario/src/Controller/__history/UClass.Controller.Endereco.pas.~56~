@@ -1,0 +1,106 @@
+unit UClass.Controller.Endereco;
+
+interface
+
+uses System.SysUtils,
+     System.Math,
+     System.Generics.Collections,
+     UClass.Model.Endereco,
+     UClass.DAO.Endereco,
+     UClass.Client.Google,
+     UClass.Model.Google.Geocode;
+
+type
+   IControllerEndereco = interface
+   ['{50B02917-E11F-4363-B15F-49BDB7B439AA}']
+      procedure DeletarEndereco(aCodigo : Integer);
+      procedure InserirEndereco(aEndereco : TEndereco);
+      procedure AtualizarEndereco(aEndereco : TEndereco);
+       function EnderecosDoUsuario(aCodUsuario : Integer) : TObjectList<TEndereco>;
+   end;
+
+   TControllerEndereco = class(TInterfacedObject, IControllerEndereco)
+   public
+      procedure DeletarEndereco(aCodigo : Integer);
+      procedure InserirEndereco(aEndereco : TEndereco);
+      procedure AtualizarEndereco(aEndereco : TEndereco);
+       function EnderecosDoUsuario(aCodUsuario : Integer) : TObjectList<TEndereco>;
+   end;
+
+implementation
+
+{ TControllerEndereco }
+
+procedure TControllerEndereco.AtualizarEndereco(aEndereco: TEndereco);
+var LDAO : TDAOEndereco;
+    LEndOld : TEndereco;
+    LGeocode : TGeocode;
+begin
+   LDAO := TDAOEndereco.Create;
+   try
+      LEndOld := LDAO.Get(aEndereco.Codigo);
+
+      if not Assigned(LEndOld) then
+         raise Exception.Create('Não foi localizado o endereço com o código informado');
+
+      if (aEndereco.Cidade   <> LEndOld.Cidade) or
+         (aEndereco.Estado   <> LEndOld.Estado) or
+         (aEndereco.Bairro   <> LEndOld.Bairro) or
+         (aEndereco.Numero   <> LEndOld.Numero) or
+         (aEndereco.Endereco <> LEndOld.Endereco) then
+
+
+      LDAO.Update(aEndereco);
+   finally
+      FreeAndNil(LDAO);
+   end;
+end;
+
+procedure TControllerEndereco.DeletarEndereco(aCodigo: Integer);
+var LDAO : TDAOEndereco;
+begin
+   LDAO := TDAOEndereco.Create;
+   try
+      LDAO.Delete(aCodigo);
+   finally
+      FreeAndNil(LDAO);
+   end;
+end;
+
+function TControllerEndereco.EnderecosDoUsuario(
+  aCodUsuario: Integer): TObjectList<TEndereco>;
+var LDAO : TDAOEndereco;
+begin
+   LDAO := TDAOEndereco.Create;
+   try
+      Result := LDAO.EnderecoDoUsuario(aCodUsuario);
+   finally
+      FreeAndNil(LDAO);
+   end;
+end;
+
+procedure TControllerEndereco.InserirEndereco(aEndereco: TEndereco);
+var LDAO : TDAOEndereco;
+    LGeocode : TGeocode;
+begin
+   LGeocode := nil;
+   LDAO := TDAOEndereco.Create;
+   try
+      LGeocode := TClientGoogle.GetInstance.Geocode(aEndereco);
+
+      if LGeocode.Status = 'OK' then
+      begin
+         aEndereco.Lat  := LGeocode.Lat;
+         aEndereco.Long := LGeocode.Lng;
+      end;
+
+      LDAO.Insert(aEndereco);
+   finally
+      FreeAndNil(LDAO);
+
+      if Assigned(LGeocode) then
+         FreeAndNil(LGeocode);
+   end;
+end;
+
+end.

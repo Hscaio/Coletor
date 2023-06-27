@@ -1,0 +1,353 @@
+unit UClass.View.Frame.ItemEndereco;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  UClass.Utils.Frame, FMX.Objects, FMX.Layouts, FMX.Controls.Presentation,
+  UClass.Model.Endereco, UClass.Model.SolicitacaoColeta, UClass.View.Frame.ListEndereco,
+  UClass.View.Frame.AvaliarColeta;
+
+type
+  TfrmItemEndereco = class(TFrameUtil)
+    lyFundo: TLayout;
+    lbEndereco: TLabel;
+    imgHouse: TImage;
+    lbComplemento: TLabel;
+    lbFixo: TLabel;
+    lyButton: TLayout;
+    lySolicitarColeta: TLayout;
+    rcColeta: TRectangle;
+    lbColeta: TLabel;
+    lyDeletar: TLayout;
+    rcDeletar: TRectangle;
+    imgLixo: TImage;
+    lyAlterar: TLayout;
+    imAlterar: TImage;
+    rcAlterar: TRectangle;
+    lyCancelarColeta: TLayout;
+    rcCancelarColeta: TRectangle;
+    lbCancelarColeta: TLabel;
+    lyAvaliar: TLayout;
+    rcAvaliar: TRectangle;
+    imAvaliar: TImage;
+    procedure lyDeletarClick(Sender: TObject);
+    procedure lyAlterarClick(Sender: TObject);
+    procedure lySolicitarColetaClick(Sender: TObject);
+    procedure lyCancelarColetaClick(Sender: TObject);
+    procedure lyAvaliarClick(Sender: TObject);
+  private
+    { Private declarations }
+    FEndereco : TEndereco;
+    FListEndereco : TfrmListEndereco;
+    procedure SetEndereco(const Value: TEndereco);
+
+     function Deletar : Boolean;
+     function SolicitarColeta : Boolean;
+     function CancelarColeta : Boolean;
+    procedure Alterar;
+    procedure AtualizarDados;
+  public
+    { Public declarations }
+    property Endereco : TEndereco read FEndereco write SetEndereco;
+    property ListEndereco : TfrmListEndereco read FListEndereco write FListEndereco;
+  end;
+
+var
+  frmItemEndereco: TfrmItemEndereco;
+
+implementation
+
+{$R *.fmx}
+
+uses UClass.Client.Endereco, System.Threading, UClass.Utils.Notificacao,
+  System.Generics.Collections, UClass.Model.Response, UClass.Utils.Cache,
+  UClass.Utils.MainScreen, UClass.View.Frame.Endereco;
+
+{ TFrameUtil1 }
+
+procedure TfrmItemEndereco.Alterar;
+var LfrmEndereco : TfrmEndereco;
+begin
+   LfrmEndereco := TfrmEndereco.Create(nil);
+   LfrmEndereco.Endereco := FEndereco;
+   TMainScreen.GetInstance.Show<TfrmEndereco>(LfrmEndereco);
+end;
+
+procedure TfrmItemEndereco.AtualizarDados;
+begin
+   if not Assigned(FEndereco) then
+      Exit;
+
+   lbEndereco.Text    := Concat(FEndereco.Endereco,', ',FEndereco.Numero);
+   lbComplemento.Text := Concat(FEndereco.Bairro,' - ',FEndereco.Cidade,'/',FEndereco.Estado);
+
+   if not Assigned(FEndereco.SolicitacaoColeta) then
+      lyCancelarColeta.Visible := False
+   else
+   begin
+      if FEndereco.SolicitacaoColeta.Status <> sscPendende then
+         lyCancelarColeta.Visible := False
+      else
+         lyCancelarColeta.Visible := True;
+
+      lyAvaliar.Visible := (FEndereco.SolicitacaoColeta.Status = sscConcluido) and (FEndereco.SolicitacaoColeta.Avalicao <= 0);
+   end;
+
+   lySolicitarColeta.Visible := not lyCancelarColeta.Visible;
+   lyAlterar.Visible := not lyCancelarColeta.Visible;
+   lyDeletar.Visible := not lyCancelarColeta.Visible;
+end;
+
+function TfrmItemEndereco.CancelarColeta: Boolean;
+var LResponse : TResponse<TSolicitacaoColeta>;
+begin
+   Result := False;
+
+   try
+      if not Assigned(FEndereco.SolicitacaoColeta) then
+         raise Exception.Create('Não foi localizado a Solicitação de Coleta do endereço!');
+
+      LResponse := nil;
+      try
+         LResponse := TClientEndereco.GetInstance.CancelarColeta(FEndereco.SolicitacaoColeta.Codigo);
+
+         if LResponse.Status.Code <> 200 then
+            raise Exception.Create(LResponse.Status.Message);
+
+         FEndereco.SolicitacaoColeta.Status := sscCancelado;
+         AtualizarDados;
+
+         Result := True;
+      finally
+         if Assigned(LResponse) then
+            FreeAndNil(LResponse);
+      end;
+   except on E: Exception do
+      begin
+         TThread.Synchronize(TThread.CurrentThread,
+            procedure
+            begin
+               TDialoger.GetInstance.ShowMessage(E.Message,mtError);
+            end
+         );
+      end;
+   end;
+end;
+
+function TfrmItemEndereco.Deletar : Boolean;
+var LResponse : TResponse<TEndereco>;
+    LListEnd : TObjectList<TEndereco>;
+begin
+   Result := False;
+
+   try
+      LResponse := nil;
+      try
+
+         LResponse := TClientEndereco.GetInstance.DeletarEndereco(FEndereco.Codigo);
+
+         if LResponse.Status.Code <> 200 then
+            raise Exception.Create(LResponse.Status.Message);
+
+         LListEnd := TObjectList<TEndereco>(TCache.GetInstance.Get(chListaEndereco));
+
+         if Assigned(LListEnd) then
+         begin
+            LListEnd.Remove(FEndereco);
+            FEndereco := nil;
+         end;
+
+         if Assigned(FListEndereco) then
+            FListEndereco.Refresh;
+
+         Result := True;
+      finally
+         if Assigned(LResponse) then
+            FreeAndNil(LResponse);
+      end;
+   except on E: Exception do
+      begin
+         TThread.Synchronize(TThread.CurrentThread,
+            procedure
+            begin
+               TDialoger.GetInstance.ShowMessage(E.Message,mtError);
+            end
+         );
+      end;
+   end;
+end;
+
+
+procedure TfrmItemEndereco.lyAlterarClick(Sender: TObject);
+begin
+   inherited;
+   Alterar;
+end;
+
+procedure TfrmItemEndereco.lyAvaliarClick(Sender: TObject);
+begin
+   inherited;
+   TMainScreen.GetInstance.Show<TfrmAvaliar>(nil);
+end;
+
+procedure TfrmItemEndereco.lyCancelarColetaClick(Sender: TObject);
+begin
+  inherited;
+   TDialoger.GetInstance.ShowMessage(
+      'Deseja cancelar a solicitação da coleta para o endereço selecionado?',
+      mtConfirmation,
+      procedure(aMessageResponse : TMessageResponse)
+      var LTask : ITask;
+      begin
+         if aMessageResponse <> TMessageResponse.mrYes then
+            Exit;
+
+         TDialoger.GetInstance.ShowLoad;
+         LTask := TTask.Run(
+            procedure
+            begin
+               try
+                  if not CancelarColeta then
+                     Exit;
+
+                  TThread.Synchronize(TThread.CurrentThread,
+                     procedure
+                     begin
+                        TDialoger.GetInstance.ToastMessage('Solitação cancelada com Sucesso!');
+                     end
+                  );
+               finally
+                  TThread.Synchronize(TThread.CurrentThread,
+                     procedure
+                     begin
+                        TDialoger.GetInstance.HideLoad;
+                     end
+                  );
+               end;
+            end
+         );
+      end
+   );
+end;
+
+procedure TfrmItemEndereco.lyDeletarClick(Sender: TObject);
+begin
+   TDialoger.GetInstance.ShowMessage(
+      'Deseja excluir o endereço selecionado?',
+      mtConfirmation,
+      procedure(aMessageResponse : TMessageResponse)
+      var LTask : ITask;
+      begin
+         if aMessageResponse <> TMessageResponse.mrYes then
+            Exit;
+
+         TDialoger.GetInstance.ShowLoad;
+         LTask := TTask.Run(
+            procedure
+            begin
+               try
+                  if not Deletar then
+                     Exit;
+
+                  TThread.Synchronize(TThread.CurrentThread,
+                     procedure
+                     begin
+                        Self.Visible := False;
+                     end
+                  );
+               finally
+                  TThread.Synchronize(TThread.CurrentThread,
+                     procedure
+                     begin
+                        TDialoger.GetInstance.HideLoad;
+                     end
+                  );
+               end;
+            end
+         );
+      end
+   );
+end;
+
+procedure TfrmItemEndereco.lySolicitarColetaClick(Sender: TObject);
+begin
+  inherited;
+   TDialoger.GetInstance.ShowMessage(
+      'Deseja solicitar a coleta para o endereço selecionado?',
+      mtConfirmation,
+      procedure(aMessageResponse : TMessageResponse)
+      var LTask : ITask;
+      begin
+         if aMessageResponse <> TMessageResponse.mrYes then
+            Exit;
+
+         TDialoger.GetInstance.ShowLoad;
+         LTask := TTask.Run(
+            procedure
+            begin
+               try
+                  if not SolicitarColeta then
+                     Exit;
+
+                  TThread.Synchronize(TThread.CurrentThread,
+                     procedure
+                     begin
+                        TDialoger.GetInstance.ToastMessage('Solitação realizada com Sucesso!');
+                     end
+                  );
+               finally
+                  TThread.Synchronize(TThread.CurrentThread,
+                     procedure
+                     begin
+                        TDialoger.GetInstance.HideLoad;
+                     end
+                  );
+               end;
+            end
+         );
+      end
+   );
+end;
+
+procedure TfrmItemEndereco.SetEndereco(const Value: TEndereco);
+begin
+   FEndereco := Value;
+   AtualizarDados;
+end;
+
+function TfrmItemEndereco.SolicitarColeta: Boolean;
+var LResponse : TResponse<TSolicitacaoColeta>;
+begin
+   Result := False;
+
+   try
+      LResponse := nil;
+      try
+         LResponse := TClientEndereco.GetInstance.SolicitarColeta(FEndereco.Codigo);
+
+         if LResponse.Status.Code <> 200 then
+            raise Exception.Create(LResponse.Status.Message);
+
+         FEndereco.SolicitacaoColeta := LResponse.Data;
+         AtualizarDados;
+
+         Result := True;
+      finally
+         if Assigned(LResponse) then
+            FreeAndNil(LResponse);
+      end;
+   except on E: Exception do
+      begin
+         TThread.Synchronize(TThread.CurrentThread,
+            procedure
+            begin
+               TDialoger.GetInstance.ShowMessage(E.Message,mtError);
+            end
+         );
+      end;
+   end;
+end;
+
+end.

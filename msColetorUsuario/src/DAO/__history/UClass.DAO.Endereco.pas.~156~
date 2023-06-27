@@ -1,0 +1,382 @@
+unit UClass.DAO.Endereco;
+
+interface
+
+uses System.SysUtils,
+     System.Generics.Collections,
+     System.Variants,
+
+     Data.DB,
+     FireDAC.Comp.Client,
+     FireDAC.Stan.Param,
+
+     UClass.DAO.Base,
+     UClass.DAO.SolicitacaoColeta,
+     UClass.Model.Endereco,
+     UClass.Controller.Connection;
+
+type
+   TDAOEndereco = class(TDAOBase<TEndereco>)
+   private
+      function QueryToObject(aQuery : TFDQuery) : TEndereco;
+   public
+      constructor Create;
+
+      procedure ExecDDL; override;
+       function Insert(aModel : TEndereco) : Integer; override;
+      procedure Update(aModel : TEndereco); override;
+      procedure Delete(aModel : TEndereco); overload; override;
+      procedure Delete(aCodigo : Integer); overload;
+       function Get(aCodigo : Integer) : TEndereco; override;
+       function Contains(aCodigo : Integer) : Boolean; overload;
+
+      function Endereco(aCodigo : Integer) : TEndereco;
+      function EnderecoDoUsuario(aCodUsuario : Integer) : TObjectList<TEndereco>;
+   end;
+
+implementation
+
+{ TDAOEndereco }
+
+function TDAOEndereco.Contains(aCodigo: Integer): Boolean;
+var LQuery : TFDQuery;
+begin
+   inherited;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      LQuery.Open('SELECT FIRST 1 1 FROM ENDERECO WHERE END_CODIGO = :COD',[aCodigo]);
+      Result := not LQuery.IsEmpty;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+constructor TDAOEndereco.Create;
+begin
+   FGenerator := 'GEN_ENDERECO';
+end;
+
+procedure TDAOEndereco.Delete(aModel: TEndereco);
+begin
+   inherited;
+   Delete(aModel.Codigo);
+end;
+
+procedure TDAOEndereco.Delete(aCodigo: Integer);
+var LQuery : TFDQuery;
+    LDAO : TDAOSolicitacaoColeta;
+begin
+   inherited;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   LDAO   := TDAOSolicitacaoColeta.Create;
+   try
+      try
+         if LDAO.EnderecoPossuiColeta(aCodigo) then
+            LQuery.ExecSQL('UPDATE ENDERECO SET END_ATIVO = ''N'' WHERE END_CODIGO = :COD',[aCodigo])
+         else
+            LQuery.ExecSQL('DELETE FROM ENDERECO WHERE END_CODIGO = :COD',[aCodigo]);
+
+         LQuery.Transaction.Commit;
+      except on E: Exception do
+         begin
+            LQuery.Transaction.Rollback;
+            raise Exception.Create('Erro ao Deletar Usuario: ' + E.Message);
+         end;
+      end;
+   finally
+      FreeAndNil(LQuery);
+      FreeAndNil(LDAO);
+   end;
+end;
+
+function TDAOEndereco.Endereco(aCodigo: Integer): TEndereco;
+var LQuery : TFDQuery;
+begin
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Open('SELECT *                 '+
+                     '  FROM ENDERECO          '+
+                     ' WHERE END_CODIGO = :COD ',
+                     [aCodigo]);
+
+         Result := QueryToObject(LQuery);
+
+      except on E: Exception do
+         raise Exception.Create('Erro ao buscar Endereco: ' + E.Message);
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+function TDAOEndereco.EnderecoDoUsuario(aCodUsuario: Integer): TObjectList<TEndereco>;
+var LQuery : TFDQuery;
+begin
+   Result := TObjectList<TEndereco>.Create;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Open('SELECT *                  '+
+                     '  FROM ENDERECO           '+
+                     ' WHERE END_USUARIO = :COD ',
+                     [aCodUsuario]);
+
+         LQuery.First;
+         while not LQuery.Eof do
+         begin
+            Result.Add(QueryToObject(LQuery));
+            LQuery.Next;
+         end;
+      except on E: Exception do
+         raise Exception.Create('Erro ao buscar Endereco do Usuário: ' + E.Message);
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+procedure TDAOEndereco.ExecDDL;
+begin
+  inherited;
+
+  with TConnection.GetInstance do
+  begin
+     CreateGeneretor(FGenerator);
+     CreateTable(
+        'ENDERECO',
+        'CREATE TABLE ENDERECO (                            '+
+        '   END_CODIGO INTEGER,                             '+
+        '   CONSTRAINT PK_ENDERECO PRIMARY KEY (END_CODIGO) '+
+        ')                                                  '
+     );
+
+     CreateField(
+        'ENDERECO',
+        'END_USUARIO',
+        'ALTER TABLE ENDERECO ADD END_USUARIO INTEGER NOT NULL,                                                   '+
+        '                     ADD CONSTRAINT FK_END_USU FOREIGN KEY (END_USUARIO) REFERENCES USUARIO (USU_CODIGO) '
+     );
+
+     CreateField(
+        'ENDERECO',
+        'END_CIDADE',
+        120,
+        'ALTER TABLE ENDERECO ADD END_CIDADE VARCHAR(120) NOT NULL'
+     );
+
+     CreateField(
+        'ENDERECO',
+        'END_ESTADO',
+        120,
+        'ALTER TABLE ENDERECO ADD END_ESTADO VARCHAR(120) NOT NULL'
+     );
+
+     CreateField(
+        'ENDERECO',
+        'END_BAIRRO',
+        120,
+        'ALTER TABLE ENDERECO ADD END_BAIRRO VARCHAR(120) NOT NULL'
+     );
+
+     CreateField(
+        'ENDERECO',
+        'END_ENDERECO',
+        120,
+        'ALTER TABLE ENDERECO ADD END_ENDERECO VARCHAR(120) NOT NULL'
+     );
+
+     CreateField(
+        'ENDERECO',
+        'END_NUMERO',
+        120,
+        'ALTER TABLE ENDERECO ADD END_NUMERO VARCHAR(120) NOT NULL'
+     );
+
+     CreateField(
+        'ENDERECO',
+        'END_COMPLEMENTO',
+        120,
+        'ALTER TABLE ENDERECO ADD END_COMPLEMENTO VARCHAR(120)'
+     );
+
+     CreateField(
+        'ENDERECO',
+        'END_LAT',
+        'ALTER TABLE ENDERECO ADD END_LAT NUMERIC(18,6)'
+     );
+
+     CreateField(
+        'ENDERECO',
+        'END_LONG',
+        'ALTER TABLE ENDERECO ADD END_LONG NUMERIC(18,6)'
+     );
+
+     CreateField(
+        'ENDERECO',
+        'END_ULT_COLETA',
+        'ALTER TABLE ENDERECO ADD END_ULT_COLETA INTEGER NOT NULL '
+     );
+
+     CreateField(
+        'ENDERECO',
+        'END_ATIVO',
+        1,
+        'ALTER TABLE ENDERECO ADD END_ATIVO VARCHAR(1) DEFAULT ''S'' NOT NULL'
+     );
+  end;
+end;
+
+function TDAOEndereco.Get(aCodigo: Integer): TEndereco;
+var LQuery : TFDQuery;
+begin
+   Result := nil;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Open('SELECT *                  '+
+                     '  FROM ENDERECO           '+
+                     ' WHERE END_CODIGO = :COD  ',
+                     [aCodigo]);
+
+         if LQuery.IsEmpty then
+            Exit;
+
+         Result := QueryToObject(LQuery);
+      except on E: Exception do
+         raise Exception.Create('Erro ao buscar Endereco: ' + E.Message);
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+
+function TDAOEndereco.Insert(aModel: TEndereco): Integer;
+var LQuery : TFDQuery;
+begin
+   inherited;
+   Result := NextGenerator;
+
+   aModel.Codigo := Result;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Close;
+         LQuery.SQL.Clear;
+         LQuery.SQL.Text := ' INSERT INTO ENDERECO (END_CODIGO, END_USUARIO, END_CIDADE, END_ESTADO, END_BAIRRO,     '+
+                            '                       END_ENDERECO, END_COMPLEMENTO,                                   '+
+                            '                       END_LONG, END_LAT, END_NUMERO)                                   '+
+                            '              VALUES (:END_CODIGO, :END_USUARIO, :END_CIDADE, :END_ESTADO, :END_BAIRRO, '+
+                            '                      :END_ENDERECO, :END_COMPLEMENTO,                                  '+
+                            '                      :END_LONG, :END_LAT, :END_NUMERO)                                 ';
+         LQuery.ParamByName('END_CODIGO').Value      := ValueToVariant(aModel.Codigo);
+         LQuery.ParamByName('END_USUARIO').Value     := ValueToVariant(aModel.Usuario);
+         LQuery.ParamByName('END_CIDADE').Value      := ValueToVariant(aModel.Cidade);
+         LQuery.ParamByName('END_ESTADO').Value      := ValueToVariant(aModel.Estado);
+         LQuery.ParamByName('END_BAIRRO').Value      := ValueToVariant(aModel.Bairro);
+         LQuery.ParamByName('END_NUMERO').Value      := ValueToVariant(aModel.Numero);
+         LQuery.ParamByName('END_ENDERECO').Value    := ValueToVariant(aModel.Endereco);
+         LQuery.ParamByName('END_COMPLEMENTO').Value := ValueToVariant(aModel.Complemento);
+         LQuery.ParamByName('END_LONG').Value        := ValueToVariant(aModel.Long);
+         LQuery.ParamByName('END_LAT').Value         := ValueToVariant(aModel.Lat);
+         LQuery.ExecSQL;
+
+         LQuery.Transaction.Commit;
+      except on E: Exception do
+         begin
+            LQuery.Transaction.Rollback;
+            raise Exception.Create('Erro ao Inserir Usuario: ' + E.Message);
+         end;
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+function TDAOEndereco.QueryToObject(aQuery: TFDQuery): TEndereco;
+var LDAOSol : TDAOSolicitacaoColeta;
+begin
+   if aQuery.IsEmpty then
+      Exit(nil);
+
+   Result := TEndereco.Create;
+   Result.Codigo      := aQuery.FieldByName('END_CODIGO').AsInteger;
+   Result.Usuario     := aQuery.FieldByName('END_USUARIO').AsInteger;
+   Result.Cidade      := aQuery.FieldByName('END_CIDADE').AsString;
+   Result.Estado      := aQuery.FieldByName('END_ESTADO').AsString;
+   Result.Bairro      := aQuery.FieldByName('END_BAIRRO').AsString;
+   Result.Endereco    := aQuery.FieldByName('END_ENDERECO').AsString;
+   Result.Numero      := aQuery.FieldByName('END_NUMERO').AsString;
+   Result.Complemento := aQuery.FieldByName('END_COMPLEMENTO').AsString;
+   Result.Lat         := aQuery.FieldByName('END_LAT').AsFloat;
+   Result.Long        := aQuery.FieldByName('END_LONG').AsFloat;
+
+   if not aQuery.FieldByName('END_ULT_COLETA').IsNull then
+   begin
+      LDAOSol := TDAOSolicitacaoColeta.Create;
+      try
+         Result.SolicitacaoColeta := LDAOSol.Get(aQuery.FieldByName('END_ULT_COLETA').AsInteger);
+      finally
+         FreeAndNil(LDAOSol);
+      end;
+   end;
+end;
+
+procedure TDAOEndereco.Update(aModel: TEndereco);
+var LQuery : TFDQuery;
+begin
+   inherited;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Close;
+         LQuery.SQL.Clear;
+         LQuery.SQL.Text := 'UPDATE ENDERECO A                            '+
+                            '   SET A.END_USUARIO = :END_USUARIO,         '+
+                            '       A.END_CIDADE = :END_CIDADE,           '+
+                            '       A.END_ESTADO = :END_ESTADO,           '+
+                            '       A.END_BAIRRO = :END_BAIRRO,           '+
+                            '       A.END_ENDERECO = :END_ENDERECO,       '+
+                            '       A.END_NUMERO = :END_NUMERO,           '+
+                            '       A.END_COMPLEMENTO = :END_COMPLEMENTO, '+
+                            '       A.END_LONG = :END_LONG,               '+
+                            '       A.END_LAT = :END_LAT,                 '+
+                            '       A.END_ULT_COLETA = :END_ULT_COLETA    '+
+                            ' WHERE A.END_CODIGO = :END_CODIGO            ';
+         LQuery.ParamByName('END_CODIGO').Value      := ValueToVariant(aModel.Codigo);
+         LQuery.ParamByName('END_USUARIO').Value     := ValueToVariant(aModel.Usuario);
+         LQuery.ParamByName('END_CIDADE').Value      := ValueToVariant(aModel.Cidade);
+         LQuery.ParamByName('END_ESTADO').Value      := ValueToVariant(aModel.Estado);
+         LQuery.ParamByName('END_BAIRRO').Value      := ValueToVariant(aModel.Bairro);
+         LQuery.ParamByName('END_ENDERECO').Value    := ValueToVariant(aModel.Endereco);
+         LQuery.ParamByName('END_NUMERO').Value      := ValueToVariant(aModel.Numero);
+         LQuery.ParamByName('END_COMPLEMENTO').Value := ValueToVariant(aModel.Complemento);
+         LQuery.ParamByName('END_LAT').Value         := ValueToVariant(aModel.Lat);
+         LQuery.ParamByName('END_LONG').Value        := ValueToVariant(aModel.Long);
+         LQuery.ParamByName('END_ULT_COLETA').Value  := Null;
+
+         if Assigned(aModel.SolicitacaoColeta) then
+            LQuery.ParamByName('END_ULT_COLETA').Value := aModel.SolicitacaoColeta.Codigo;
+
+         LQuery.ExecSQL;
+
+         LQuery.Transaction.Commit;
+      except on E: Exception do
+         begin
+            LQuery.Transaction.Rollback;
+            raise Exception.Create('Erro ao Atualizar Usuario: ' + E.Message);
+         end;
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+end.

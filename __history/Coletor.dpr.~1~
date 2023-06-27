@@ -1,0 +1,14 @@
+program Coletor;
+
+uses
+  System.StartUpCopy,
+  FMX.Forms,
+  UClass.View.Menu in 'src\UClass.View.Menu.pas' {Form3};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.CreateForm(TForm3, Form3);
+  Application.Run;
+end.

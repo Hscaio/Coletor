@@ -1,0 +1,261 @@
+unit UClass.Horse.Endereco;
+
+interface
+
+uses System.SysUtils,
+     System.JSON,
+
+     UClass.Utils.Crypt,
+
+     Horse,
+     Horse.Jhonson,
+
+     UClass.Horse.Base,
+     UClass.Model.Endereco,
+     UClass.Model.SolicitacaoColeta,
+     UClass.Controller.Endereco,
+     UClass.Controller.SolicitacaoColeta;
+
+type
+
+   THorseEndereco = class(THorseBase)
+   private
+      class procedure DeletarEndereco(aReq: THorseRequest; aRes: THorseResponse);
+      class procedure InserirEndereco(aReq: THorseRequest; aRes: THorseResponse);
+      class procedure AtualizarEndereco(aReq: THorseRequest; aRes: THorseResponse);
+      class procedure EnderecosDoUsuario(aReq: THorseRequest; aRes: THorseResponse);
+      class procedure ColetasDoUsuario(aReq: THorseRequest; aRes: THorseResponse);
+      class procedure SolicitarColeta(aReq: THorseRequest; aRes: THorseResponse);
+      class procedure CancelarColeta(aReq: THorseRequest; aRes: THorseResponse);
+      class procedure AvaliarSolicitarColeta(aReq: THorseRequest; aRes: THorseResponse);
+      class procedure ConcluirColeta(aReq: THorseRequest; aRes: THorseResponse);
+   public
+      class procedure Registering; override;
+   end;
+
+implementation
+
+uses
+  System.Generics.Collections;
+
+{ THorseEndereco }
+
+class procedure THorseEndereco.AtualizarEndereco(aReq: THorseRequest;
+  aRes: THorseResponse);
+var LController : IControllerEndereco;
+    LEndereco   : TEndereco;
+begin
+   try
+      LController := TControllerEndereco.Create;
+      LEndereco := TEndereco.Create;
+      try
+         LEndereco.JSONToObject(aReq.Body<TJSONObject>);
+         LController.AtualizarEndereco(LEndereco);
+
+         aRes.Status(200);
+         aRes.Send<TJSONValue>(CreateStatusResponse(200,'Endereço atualizado com sucesso!',LEndereco));
+      finally
+         FreeAndNil(LEndereco);
+      end;
+   except on E: Exception do
+      begin
+         aRes.Status(500);
+         aRes.Send<TJSONObject>(CreateStatusResponse(500,E.Message));
+      end;
+   end;
+end;
+
+class procedure THorseEndereco.AvaliarSolicitarColeta(aReq: THorseRequest;
+  aRes: THorseResponse);
+var LController : IControllerSolicitacaoColeta;
+    LCodigo : Integer;
+    LAvaliacao : Integer;
+    LComentario : String;
+    LSolicitacao : TSolicitacaoColeta;
+begin
+   try
+      LCodigo     := aReq.Params.Field('COD').AsInteger;
+      LAvaliacao  := aReq.Params.Field('AVA').AsInteger;
+      LComentario := aReq.Params.Field('OBS').AsString;
+      LComentario := TCrypt.GetInstance.Decrypt(LComentario);
+
+      LController := TControllerSolicitacaoColeta.Create;
+      LSolicitacao := LController.AvaliarColeta(LCodigo, LAvaliacao, LComentario);
+
+      aRes.Status(200);
+      aRes.Send<TJSONValue>(CreateStatusResponse<TSolicitacaoColeta>(200,'Coleta avaliada com sucesso!',LSolicitacao));
+   except on E: Exception do
+      begin
+         aRes.Status(500);
+         aRes.Send<TJSONObject>(CreateStatusResponse(500,E.Message));
+      end;
+   end;
+end;
+
+class procedure THorseEndereco.CancelarColeta(aReq: THorseRequest;
+  aRes: THorseResponse);
+var LController : IControllerSolicitacaoColeta;
+    LCodigo : Integer;
+begin
+   try
+      LCodigo := aReq.Params.Field('COD').AsInteger;
+
+      LController := TControllerSolicitacaoColeta.Create;
+      LController.CancelarColeta(LCodigo);
+
+      aRes.Status(200);
+      aRes.Send<TJSONValue>(CreateStatusResponse(200,'Coleta cancelada com sucesso!'));
+   except on E: Exception do
+      begin
+         aRes.Status(500);
+         aRes.Send<TJSONObject>(CreateStatusResponse(500,E.Message));
+      end;
+   end;
+end;
+
+class procedure THorseEndereco.ColetasDoUsuario(aReq: THorseRequest;
+  aRes: THorseResponse);
+var LController : IControllerEndereco;
+    LCodigo : Integer;
+    LListEnd : TObjectList<TEndereco>;
+    LJSON : TJSONArray;
+begin
+   try
+      LCodigo := aReq.Params.Field('COD').AsInteger;
+
+      LListEnd := nil;
+      try
+         LController := TControllerEndereco.Create;
+         LListEnd := LController.ColetasDoUsuario(LCodigo);
+
+         LJSON := TEndereco.ListToJSON<TEndereco>(LListEnd);
+      finally
+         if Assigned(LListEnd) then
+            FreeAndNil(LListEnd);
+      end;
+
+      aRes.Status(200);
+      aRes.Send<TJSONArray>(LJSON);
+   except on E: Exception do
+      begin
+         aRes.Status(500);
+         aRes.Send<TJSONObject>(CreateStatusResponse(500,E.Message));
+      end;
+   end;
+end;
+
+class procedure THorseEndereco.DeletarEndereco(aReq: THorseRequest;
+  aRes: THorseResponse);
+var LController : IControllerEndereco;
+    LCodigo : Integer;
+begin
+   try
+      LCodigo := aReq.Params.Field('COD').AsInteger;
+
+      LController := TControllerEndereco.Create;
+      LController.DeletarEndereco(LCodigo);
+
+      aRes.Status(200);
+      aRes.Send<TJSONValue>(CreateStatusResponse(200,'Endereço deletado ou inativado com sucesso!'));
+   except on E: Exception do
+      begin
+         aRes.Status(500);
+         aRes.Send<TJSONObject>(CreateStatusResponse(500,E.Message));
+      end;
+   end;
+end;
+
+class procedure THorseEndereco.EnderecosDoUsuario(aReq: THorseRequest;
+  aRes: THorseResponse);
+var LController : IControllerEndereco;
+    LCodigo : Integer;
+    LListEnd : TObjectList<TEndereco>;
+    LJSON : TJSONArray;
+begin
+   try
+      LCodigo := aReq.Params.Field('COD').AsInteger;
+
+      LListEnd := nil;
+      try
+         LController := TControllerEndereco.Create;
+         LListEnd := LController.EnderecosDoUsuario(LCodigo);
+
+         LJSON := TEndereco.ListToJSON<TEndereco>(LListEnd);
+      finally
+         if Assigned(LListEnd) then
+            FreeAndNil(LListEnd);
+      end;
+
+      aRes.Status(200);
+      aRes.Send<TJSONArray>(LJSON);
+   except on E: Exception do
+      begin
+         aRes.Status(500);
+         aRes.Send<TJSONObject>(CreateStatusResponse(500,E.Message));
+      end;
+   end;
+end;
+
+class procedure THorseEndereco.InserirEndereco(aReq: THorseRequest;
+  aRes: THorseResponse);
+var LController : IControllerEndereco;
+    LEndereco   : TEndereco;
+begin
+   try
+      LController := TControllerEndereco.Create;
+      LEndereco := TEndereco.Create;
+      try
+         LEndereco.JSONToObject(aReq.Body<TJSONObject>);
+         LController.InserirEndereco(LEndereco);
+
+         aRes.Status(200);
+         aRes.Send<TJSONValue>(CreateStatusResponse(200,'Endereço inserido com sucesso!',LEndereco));
+      finally
+         FreeAndNil(LEndereco);
+      end;
+   except on E: Exception do
+      begin
+         aRes.Status(500);
+         aRes.Send<TJSONObject>(CreateStatusResponse(500,E.Message));
+      end;
+   end;
+end;
+
+class procedure THorseEndereco.Registering;
+begin
+   inherited;
+   THorse.Delete('/DeletarEndereco/:COD',DeletarEndereco);
+   THorse.Post('/InserirEndereco',InserirEndereco);
+   THorse.Put('/AtualizarEndereco',AtualizarEndereco);
+   THorse.Get('/EnderecosDoUsuario/:COD',EnderecosDoUsuario);
+   THorse.Get('/ColetasDoUsuario/:COD',ColetasDoUsuario);
+   THorse.Get('/SolicitarColeta/:COD',SolicitarColeta);
+   THorse.Delete('/CancelarColeta/:COD',CancelarColeta);
+   THorse.Get('/AvaliarSolicitarColeta/:COD/:AVA/:OBS',AvaliarSolicitarColeta);
+   THorse.Get('/ConcluirColeta/:COD/:USU',ConcluirColeta);
+end;
+
+class procedure THorseEndereco.SolicitarColeta(aReq: THorseRequest;
+  aRes: THorseResponse);
+var LController : IControllerSolicitacaoColeta;
+    LCodigo : Integer;
+    LSolicitacao : TSolicitacaoColeta;
+begin
+   try
+      LCodigo := aReq.Params.Field('COD').AsInteger;
+
+      LController := TControllerSolicitacaoColeta.Create;
+      LSolicitacao := LController.SolicitarColeta(LCodigo);
+
+      aRes.Status(200);
+      aRes.Send<TJSONValue>(CreateStatusResponse<TSolicitacaoColeta>(200,'Coleta gerada com sucesso!',LSolicitacao));
+   except on E: Exception do
+      begin
+         aRes.Status(500);
+         aRes.Send<TJSONObject>(CreateStatusResponse(500,E.Message));
+      end;
+   end;
+end;
+
+
+end.

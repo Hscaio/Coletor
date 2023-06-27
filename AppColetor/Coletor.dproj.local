@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2021/11/21 03:00:08.000.577,=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2021/11/21 03:02:21.000.734,=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2022/09/28 22:07:36.000.409,=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2022/09/28 22:08:26.000.386,D:\Desenvolvimento\Delphi\Coletor v2\src\UClass.View.Menu.fmx=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Unit3.fmx</Transaction>
+    <Transaction>2022/09/28 22:08:26.000.386,D:\Desenvolvimento\Delphi\Coletor v2\src\UClass.View.Menu.pas=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2022/09/28 22:08:37.000.235,D:\Desenvolvimento\Delphi\Coletor v2\Coletor.dproj=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Project2.dproj</Transaction>
+    <Transaction>2022/09/29 19:53:23.000.937,=D:\Desenvolvimento\Delphi\Coletor v2\Unit1.pas</Transaction>
+    <Transaction>2022/09/29 19:55:50.000.873,=D:\Desenvolvimento\Delphi\Coletor v2\Unit2.pas</Transaction>
+    <Transaction>2022/09/29 19:58:38.000.223,D:\Desenvolvimento\Delphi\Coletor v2\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\src\View\UClass.View.Frame.Login.pas</Transaction>
+    <Transaction>2022/09/29 19:58:38.000.223,D:\Desenvolvimento\Delphi\Coletor v2\Unit1.fmx=D:\Desenvolvimento\Delphi\Coletor v2\src\View\UClass.View.Frame.Login.fmx</Transaction>
+    <Transaction>2022/09/29 20:25:11.000.525,=D:\Desenvolvimento\Delphi\Coletor v2\Unit1.pas</Transaction>
+    <Transaction>2022/09/29 20:31:14.000.804,D:\Desenvolvimento\Delphi\Coletor v2\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\src\View\UClass.View.Frame.CriarConta.pas</Transaction>
+    <Transaction>2022/09/29 20:31:14.000.804,D:\Desenvolvimento\Delphi\Coletor v2\Unit1.fmx=D:\Desenvolvimento\Delphi\Coletor v2\src\View\UClass.View.Frame.CriarConta.fmx</Transaction>
+    <Transaction>2022/09/29 20:31:26.000.593,=D:\Desenvolvimento\Delphi\Coletor v2\Unit2.pas</Transaction>
+    <Transaction>2022/09/29 21:27:56.000.303,D:\Desenvolvimento\Delphi\Coletor v2\Unit2.fmx=D:\Desenvolvimento\Delphi\Coletor v2\src\View\UClass.View.Frame.Endereco.fmx</Transaction>
+    <Transaction>2022/09/29 21:27:56.000.303,D:\Desenvolvimento\Delphi\Coletor v2\Unit2.pas=D:\Desenvolvimento\Delphi\Coletor v2\src\View\UClass.View.Frame.Endereco.pas</Transaction>
+    <Transaction>2022/10/03 22:16:47.000.194,=D:\Desenvolvimento\Delphi\Coletor v2\Unit1.pas</Transaction>
+    <Transaction>2022/10/03 22:17:44.000.214,D:\Desenvolvimento\Delphi\Coletor v2\src\Utils\UClass.Utils.Format.pas=D:\Desenvolvimento\Delphi\Coletor v2\Unit1.pas</Transaction>
+    <Transaction>2022/12/24 12:21:59.000.868,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2022/12/24 12:22:28.000.109,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\Comum\Client\UClass.Client.Base.pas</Transaction>
+    <Transaction>2022/12/24 12:33:21.000.209,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2022/12/24 12:34:39.000.940,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\Comum\Const\UClass.Consts.pas</Transaction>
+    <Transaction>2022/12/24 12:35:04.000.996,D:\Desenvolvimento\Delphi\Coletor v2\Comum\Const\UClass.Consts.URL=D:\Desenvolvimento\Delphi\Coletor v2\Comum\Const\UClass.Consts.URL.URL</Transaction>
+    <Transaction>2022/12/24 12:38:30.000.154,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2022/12/24 12:38:50.000.539,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\Comum\Client\UClass.Client.Usuario.pas</Transaction>
+    <Transaction>2023/01/05 20:46:46.000.607,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/05 20:47:27.000.561,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\Utils\UClass.Utils.Frame.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/09 20:52:29.000.706,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.CriarConta.pas=</Transaction>
+    <Transaction>2023/01/09 20:54:10.000.472,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/09 20:55:31.000.640,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.CriarConta.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/09 20:55:31.000.640,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.CriarConta.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx</Transaction>
+    <Transaction>2023/01/09 21:03:05.000.976,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/09 21:06:25.000.145,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.Endereco.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx</Transaction>
+    <Transaction>2023/01/09 21:06:25.000.145,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.Endereco.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/11 20:34:43.000.748,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/11 20:35:23.000.408,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\Utils\UClass.Utils.Notificacao.pas</Transaction>
+    <Transaction>2023/01/18 21:47:33.000.578,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\Utils\UClass.Utils.Format.pas=</Transaction>
+    <Transaction>2023/01/18 21:48:03.000.085,=D:\Desenvolvimento\Delphi\Coletor v2\Comum\Utils\UClass.Utils.Format.pas</Transaction>
+    <Transaction>2023/01/23 20:30:52.000.281,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/23 20:31:35.000.209,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\Utils\UClass.Utils.MainScreen.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/23 20:57:13.000.315,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\UClass.View.Menu.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\UClass.View.Main.pas</Transaction>
+    <Transaction>2023/01/23 20:57:13.000.315,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\UClass.View.Menu.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\UClass.View.Main.fmx</Transaction>
+    <Transaction>2023/01/23 20:57:52.000.672,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/23 20:59:47.000.385,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.Menu.fmx</Transaction>
+    <Transaction>2023/01/23 20:59:47.000.385,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.Menu.pas</Transaction>
+    <Transaction>2023/01/26 21:27:21.000.390,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/26 21:31:26.000.707,D:\Desenvolvimento\Delphi\Coletor v2\Comum\Utils\UClass.Utils.Crypt.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/28 20:06:05.000.584,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/28 20:06:43.000.886,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.PesqEndereco.pas</Transaction>
+    <Transaction>2023/01/28 20:06:43.000.886,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.PesqEndereco.fmx</Transaction>
+    <Transaction>2023/01/28 20:39:26.000.672,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/28 20:40:28.000.913,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ListEndereco.fmx</Transaction>
+    <Transaction>2023/01/28 20:40:28.000.913,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ListEndereco.pas</Transaction>
+    <Transaction>2023/01/29 22:16:30.000.376,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/29 22:18:13.000.949,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ItemEndereco.pas</Transaction>
+    <Transaction>2023/01/29 22:18:13.000.949,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ItemEndereco.fmx</Transaction>
+    <Transaction>2023/01/31 20:01:10.000.090,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/01/31 20:03:32.000.382,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\Comum\Utils\UClass.Utils.Cache.pas</Transaction>
+    <Transaction>2023/02/02 21:08:27.000.789,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/02/02 21:14:05.000.959,D:\Desenvolvimento\Delphi\Coletor v2\Comum\Client\UClass.Client.Endereco.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/02/09 21:17:08.000.153,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/02/09 21:24:09.000.089,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ConfigAdmin.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/02/09 21:24:09.000.089,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ConfigAdmin.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx</Transaction>
+    <Transaction>2023/02/13 21:24:06.000.904,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/02/13 21:25:59.000.626,D:\Desenvolvimento\Delphi\Coletor v2\Comum\Client\UClass.Client.Base.APP.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/03/13 21:24:04.000.068,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/03/13 21:24:28.000.196,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\Comum\Const\UClass.Consts.Login.pas</Transaction>
+    <Transaction>2023/03/16 20:37:12.000.953,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/03/16 20:42:57.000.700,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.AvaliarColeta.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx</Transaction>
+    <Transaction>2023/03/16 20:42:57.000.700,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.AvaliarColeta.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/04/03 20:40:16.000.655,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/04/03 20:40:42.000.683,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.PesqColeta.fmx</Transaction>
+    <Transaction>2023/04/03 20:40:42.000.683,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.PesqColeta.pas</Transaction>
+    <Transaction>2023/04/03 20:43:21.000.747,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit2.pas</Transaction>
+    <Transaction>2023/04/03 20:44:05.000.490,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit2.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ListColeta.pas</Transaction>
+    <Transaction>2023/04/03 20:44:05.000.490,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit2.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ListColeta.fmx</Transaction>
+    <Transaction>2023/04/18 21:17:04.000.603,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/04/18 21:17:33.000.992,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ItemColetor.pas</Transaction>
+    <Transaction>2023/04/18 21:17:33.000.992,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ItemColetor.fmx</Transaction>
+    <Transaction>2023/05/22 20:12:45.000.448,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/05/22 20:14:36.000.180,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ItemHistorico.fmx</Transaction>
+    <Transaction>2023/05/22 20:14:36.000.180,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ItemHistorico.pas</Transaction>
+    <Transaction>2023/05/22 20:54:33.000.070,=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas</Transaction>
+    <Transaction>2023/05/22 20:54:53.000.358,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.fmx=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ListHistorico.fmx</Transaction>
+    <Transaction>2023/05/22 20:54:53.000.358,D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\Unit1.pas=D:\Desenvolvimento\Delphi\Coletor v2\AppColetor\src\View\UClass.View.Frame.ListHistorico.pas</Transaction>
+  </Transactions>
+	<ActiveMobileDevice>
+		<NoProfile Android="" Android64=""/>
+	</ActiveMobileDevice>
+</BorlandProject>

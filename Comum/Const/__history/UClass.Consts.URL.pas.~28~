@@ -1,0 +1,55 @@
+unit UClass.Consts.URL;
+
+interface
+
+uses
+  System.Classes,
+  System.SysUtils,
+  System.IOUtils;
+
+var
+   URL_MSCOLETOR : String;
+
+procedure SaveURL_MSCOLETOR(aURL : String);
+procedure LoadURL_MSCOLETOR;
+
+implementation
+
+procedure SaveURL_MSCOLETOR(aURL : String);
+var LStrList : TStringList;
+begin
+   URL_MSCOLETOR := aURL.Trim;
+
+   LStrList := TStringList.Create;
+   try
+      LStrList.Text := URL_MSCOLETOR;
+      LStrList.LoadFromFile(TPath.GetDocumentsPath + '\URL_MSCOLETOR.txt');
+
+      if not LStrList.Text.Trim.IsEmpty then
+         URL_MSCOLETOR := LStrList.Text.Trim;
+   finally
+      FreeAndNil(LStrList);
+   end;
+end;
+
+procedure LoadURL_MSCOLETOR;
+var LStrList : TStringList;
+begin
+   URL_MSCOLETOR := 'http://192.168.2.56:8080';
+
+   LStrList := TStringList.Create;
+   try
+      LStrList.LoadFromFile(TPath.GetDocumentsPath + '\URL_MSCOLETOR.txt');
+
+      if not LStrList.Text.Trim.IsEmpty then
+         URL_MSCOLETOR := LStrList.Text.Trim;
+   finally
+      FreeAndNil(LStrList);
+   end;
+end;
+
+
+initialization
+   LoadURL_MSCOLETOR;
+
+end.

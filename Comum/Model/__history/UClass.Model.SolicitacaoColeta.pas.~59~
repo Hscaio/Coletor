@@ -1,0 +1,101 @@
+unit UClass.Model.SolicitacaoColeta;
+
+interface
+
+uses System.SysUtils,
+     System.JSON,
+     UClass.Model.Base,
+     UClass.Utils.Format;
+
+type
+   TStatusSolicitacaoColeta = (sscPendende, sscConcluido, sscCancelado);
+
+   TSolicitacaoColeta = class(TModelBase)
+   private
+      FDHCadastro: TDateTime;
+      FCodigo: Integer;
+      FStatus: TStatusSolicitacaoColeta;
+      FEndereco: Integer;
+      FAvalicao : Integer;
+      FComentario : String;
+      FColetor: Integer;
+      FLogEndereco: String;
+      FLogBairro: String;
+      procedure SetComentario(const Value: String);
+
+   public
+      constructor Create;
+
+      property Codigo : Integer read FCodigo write FCodigo;
+      property Endereco : Integer read FEndereco write FEndereco;
+      property Status : TStatusSolicitacaoColeta read FStatus write FStatus;
+      property DHCadastro : TDateTime read FDHCadastro write FDHCadastro;
+      property Avalicao : Integer read FAvalicao write FAvalicao;
+      property Comentario : String read FComentario write SetComentario;
+      property Coletor : Integer read FColetor write FColetor;
+      property LogEndereco : String read FLogEndereco write FLogEndereco;
+      property LogBairro : String read FLogBairro write FLogBairro;
+
+      function ObjectToJSON : TJSONObject; override;
+      procedure JSONToObject(aJSON : TJSONObject); override;
+   end;
+
+const ConstStatusSolicitacaoColeta : array[TStatusSolicitacaoColeta] of String = ('P','C','X');
+
+function StrToStatusSolicitacaoColeta(aValue : String) : TStatusSolicitacaoColeta;
+
+
+implementation
+
+function StrToStatusSolicitacaoColeta(aValue : String) : TStatusSolicitacaoColeta;
+begin
+   case aValue[1] of
+      'P' : Result := TStatusSolicitacaoColeta.sscPendende;
+      'C' : Result := TStatusSolicitacaoColeta.sscConcluido;
+      'X' : Result := TStatusSolicitacaoColeta.sscCancelado;
+      else raise Exception.Create('StrToStatusSolicitacaoColeta: Tipo não localizado ' + aValue);
+   end;
+end;
+
+{ TSolicitacaoColeta }
+
+constructor TSolicitacaoColeta.Create;
+begin
+   FDHCadastro   := 0;
+   FCodigo       := 0;
+   FStatus       := sscPendende;
+   FEndereco     := 0;
+   FColetor      := 0;
+end;
+
+procedure TSolicitacaoColeta.JSONToObject(aJSON: TJSONObject);
+begin
+   inherited;
+   FCodigo := StrToIntDef(aJSON.GetValue('Codigo').Value,0);
+   FEndereco := StrToIntDef(aJSON.GetValue('Endereco').Value,0);
+   FStatus := StrToStatusSolicitacaoColeta(aJSON.GetValue('Status').Value);
+   FDHCadastro := StrToDateTime(aJSON.GetValue('DHCadastro').Value);
+   FAvalicao := StrToIntDef(aJSON.GetValue('Avalicao').Value,0);
+   FComentario := aJSON.GetValue('Comentario').Value;
+   FColetor := StrToIntDef(aJSON.GetValue('Coletor').Value,0);
+end;
+
+function TSolicitacaoColeta.ObjectToJSON: TJSONObject;
+begin
+   Result := TJSONObject.Create;
+
+   Result.AddPair('Codigo', FCodigo.ToString);
+   Result.AddPair('Endereco', FEndereco.ToString);
+   Result.AddPair('Status', ConstStatusSolicitacaoColeta[FStatus]);
+   Result.AddPair('DHCadastro', DateTimeToStr(FDHCadastro));
+   Result.AddPair('Avalicao', FAvalicao.ToString);
+   Result.AddPair('Comentario', FComentario);
+   Result.AddPair('Coletor',FColetor);
+end;
+
+procedure TSolicitacaoColeta.SetComentario(const Value: String);
+begin
+   FComentario := Copy(Value, 1, 200);
+end;
+
+end.

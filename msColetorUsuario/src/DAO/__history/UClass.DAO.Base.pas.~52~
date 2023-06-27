@@ -1,0 +1,84 @@
+unit UClass.DAO.Base;
+
+interface
+
+uses System.SysUtils,
+     UClass.Model.Base,
+     UClass.Controller.Connection;
+
+type
+   IDAOBase<T : TModelBase> = interface
+   ['{24230B40-0E17-490E-A651-C8D08DECE37E}']
+      procedure ExecDDL;
+       function Insert(aModel : T) : Integer;
+      procedure Update(aModel : T);
+      procedure Delete(aModel : T);
+       function NextGenerator : Integer;
+   end;
+
+   TDAOBase<T : TModelBase> = class(TInterfacedObject, IDAOBase<T>)
+   protected
+      FGenerator : String;
+
+      function ValueToVariant(aStr : String) : Variant; overload;
+      function ValueToVariant(aInt : Integer) : Variant; overload;
+      function ValueToVariant(aFloat : Double) : Variant; overload;
+
+   public
+      procedure ExecDDL; virtual; abstract;
+       function Insert(aModel : T) : Integer; virtual; abstract;
+      procedure Update(aModel : T); virtual; abstract;
+      procedure Delete(aModel : T); virtual; abstract;
+       function Get(aCodigo : Integer) : T; virtual; abstract;
+       function NextGenerator : Integer;
+   end;
+
+implementation
+
+uses
+  FireDAC.Comp.Client, System.Variants;
+
+{ TDAOBase<T> }
+
+function TDAOBase<T>.NextGenerator: Integer;
+var LQuery : TFDQuery;
+begin
+   Result := 0;
+
+   if FGenerator.IsEmpty then
+      Exit;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      LQuery.Open(Format('SELECT NEXT VALUE FOR %S FROM RDB$DATABASE',[FGenerator]));
+      Result := LQuery.FieldByName('NEXT_VALUE').AsInteger;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+function TDAOBase<T>.ValueToVariant(aInt: Integer): Variant;
+begin
+   if aInt = 0 then
+      Result := Null
+   else
+      Result := aInt;
+end;
+
+function TDAOBase<T>.ValueToVariant(aStr: String): Variant;
+begin
+   if aStr.IsEmpty then
+      Result := Null
+   else
+      Result := aStr;
+end;
+
+function TDAOBase<T>.ValueToVariant(aFloat: Double): Variant;
+begin
+   if aFloat = 0 then
+      Result := Null
+   else
+      Result := aFloat;
+end;
+
+end.

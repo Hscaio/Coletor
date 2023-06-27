@@ -1,0 +1,17 @@
+program Coletor;
+
+uses
+  System.StartUpCopy,
+  FMX.Forms,
+  UClass.View.Menu in 'src\UClass.View.Menu.pas' {frmMain},
+  UClass.View.Frame.Login in 'src\View\UClass.View.Frame.Login.pas' {frmLogin: TFrame},
+  UClass.View.Frame.CriarConta in 'src\View\UClass.View.Frame.CriarConta.pas' {frmCriarConta: TFrame},
+  UClass.View.Frame.Endereco in 'src\View\UClass.View.Frame.Endereco.pas' {frmEndereco: TFrame};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.CreateForm(TfrmMain, frmMain);
+  Application.Run;
+end.

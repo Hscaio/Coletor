@@ -1,0 +1,69 @@
+program msColetor;
+
+uses
+  Vcl.SvcMgr,
+  Vcl.Forms,
+  UClass.Service.Coletor in 'src\Service\UClass.Service.Coletor.pas' {Coletor: TService},
+  UClass.View.Dashboard in 'src\View\UClass.View.Dashboard.pas' {frmDashboard},
+  UClass.Controller.Connection in 'src\Controller\UClass.Controller.Connection.pas',
+  UClass.Controller.Config in 'src\Controller\UClass.Controller.Config.pas',
+  UClass.DAO.Base in 'src\DAO\UClass.DAO.Base.pas',
+  UClass.Model.Base in '..\Comum\Model\UClass.Model.Base.pas',
+  UClass.Model.Usuario in '..\Comum\Model\UClass.Model.Usuario.pas',
+  UClass.DAO.Usuario in 'src\DAO\UClass.DAO.Usuario.pas',
+  UClass.Service.Bussines in 'src\Service\UClass.Service.Bussines.pas',
+  UClass.Controller.Usuario in 'src\Controller\UClass.Controller.Usuario.pas',
+  UClass.Horse.Bussines in 'src\Horse\UClass.Horse.Bussines.pas',
+  UClass.Horse.Usuario in 'src\Horse\UClass.Horse.Usuario.pas',
+  UClass.Horse.Base in 'src\Horse\UClass.Horse.Base.pas',
+  UClass.Model.Response in '..\Comum\Model\UClass.Model.Response.pas',
+  UClass.Model.StatusResponse in '..\Comum\Model\UClass.Model.StatusResponse.pas' {$R *.RES},
+  UClass.Utils.Format in '..\Comum\Utils\UClass.Utils.Format.pas',
+  UClass.DAO.Endereco in 'src\DAO\UClass.DAO.Endereco.pas',
+  UClass.Model.Endereco in '..\Comum\Model\UClass.Model.Endereco.pas',
+  UClass.Utils.Crypt in '..\Comum\Utils\UClass.Utils.Crypt.pas',
+  UClass.Controller.Endereco in 'src\Controller\UClass.Controller.Endereco.pas',
+  UClass.Horse.Endereco in 'src\Horse\UClass.Horse.Endereco.pas';
+
+{$R *.RES}
+{$WARN SYMBOL_PLATFORM OFF}
+
+begin
+  // Windows 2003 Server requires StartServiceCtrlDispatcher to be
+  // called before CoRegisterClassObject, which can be called indirectly
+  // by Application.Initialize. TServiceApplication.DelayInitialize allows
+  // Application.Initialize to be called from TService.Main (after
+  // StartServiceCtrlDispatcher has been called).
+  //
+  // Delayed initialization of the Application object may affect
+  // events which then occur prior to initialization, such as
+  // TService.OnCreate. It is only recommended if the ServiceApplication
+  // registers a class object with OLE and is intended for use with
+  // Windows 2003 Server.
+  //
+  // Application.DelayInitialize := True;
+  //
+
+  TConfiguration.GetInstance.Load;
+
+  TBussinessService.GetInstance.Start;
+
+  TBussinessHorse.GetInstance.Registering;
+  TBussinessHorse.GetInstance.Port := TConfiguration.GetInstance.Port;
+  TBussinessHorse.GetInstance.Start;
+
+  if (ParamStr(1) = 'app') or (System.DebugHook in [1,2]) then
+  begin
+     Vcl.Forms.Application.Initialize;
+     Vcl.Forms.Application.CreateForm(TfrmDashboard, frmDashboard);
+  Vcl.Forms.Application.Run;
+  end
+  else
+  begin
+     if (not Vcl.SvcMgr.Application.DelayInitialize) or Vcl.SvcMgr.Application.Installing then
+        Vcl.SvcMgr.Application.Initialize;
+     Vcl.SvcMgr.Application.CreateForm(TColetor, Coletor);
+     Vcl.SvcMgr.Application.Run;
+  end;
+
+end.

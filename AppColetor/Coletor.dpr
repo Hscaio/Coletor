@@ -1,0 +1,40 @@
+program Coletor;
+
+uses
+  System.StartUpCopy,
+  FMX.Forms,
+  UClass.View.Main in 'src\UClass.View.Main.pas' {frmMain},
+  UClass.View.Frame.Login in 'src\View\UClass.View.Frame.Login.pas' {frmLogin: TFrame},
+  UClass.Client.Base in '..\Comum\Client\UClass.Client.Base.pas',
+  UClass.Consts.URL in '..\Comum\Const\UClass.Consts.URL.pas',
+  UClass.Client.Usuario in '..\Comum\Client\UClass.Client.Usuario.pas',
+  UClass.Utils.Frame in 'src\Utils\UClass.Utils.Frame.pas' {FrameUtil: TFrame},
+  UClass.View.Frame.CriarConta in 'src\View\UClass.View.Frame.CriarConta.pas' {frmCriarConta: TFrame},
+  UClass.View.Frame.Endereco in 'src\View\UClass.View.Frame.Endereco.pas' {frmEndereco: TFrame},
+  UClass.Utils.Notificacao in 'src\Utils\UClass.Utils.Notificacao.pas',
+  UClass.Utils.Format in '..\Comum\Utils\UClass.Utils.Format.pas',
+  UClass.Utils.MainScreen in 'src\Utils\UClass.Utils.MainScreen.pas',
+  UClass.View.Frame.Menu in 'src\View\UClass.View.Frame.Menu.pas' {frmMenu: TFrame},
+  UClass.Utils.Crypt in '..\Comum\Utils\UClass.Utils.Crypt.pas',
+  UClass.View.Frame.PesqEndereco in 'src\View\UClass.View.Frame.PesqEndereco.pas' {frmPesqEndereco: TFrame},
+  UClass.View.Frame.ListEndereco in 'src\View\UClass.View.Frame.ListEndereco.pas' {frmListEndereco: TFrame},
+  UClass.View.Frame.ItemEndereco in 'src\View\UClass.View.Frame.ItemEndereco.pas' {frmItemEndereco: TFrame},
+  UClass.Utils.Cache in '..\Comum\Utils\UClass.Utils.Cache.pas',
+  UClass.Client.Endereco in '..\Comum\Client\UClass.Client.Endereco.pas',
+  UClass.View.Frame.ConfigAdmin in 'src\View\UClass.View.Frame.ConfigAdmin.pas' {frmConfigAdm: TFrame},
+  UClass.Client.Base.APP in '..\Comum\Client\UClass.Client.Base.APP.pas',
+  UClass.Consts.Login in '..\Comum\Const\UClass.Consts.Login.pas',
+  UClass.View.Frame.AvaliarColeta in 'src\View\UClass.View.Frame.AvaliarColeta.pas' {frmAvaliar: TFrame},
+  UClass.View.Frame.PesqColeta in 'src\View\UClass.View.Frame.PesqColeta.pas' {frmPesqColeta: TFrame},
+  UClass.View.Frame.ListColeta in 'src\View\UClass.View.Frame.ListColeta.pas' {frmListColeta: TFrame},
+  UClass.View.Frame.ItemColetor in 'src\View\UClass.View.Frame.ItemColetor.pas' {frmItemColeta: TFrame},
+  UClass.View.Frame.ItemHistorico in 'src\View\UClass.View.Frame.ItemHistorico.pas' {frmItemHistorico: TFrame},
+  UClass.View.Frame.ListHistorico in 'src\View\UClass.View.Frame.ListHistorico.pas' {frmListHistorico: TFrame};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.CreateForm(TfrmMain, frmMain);
+  Application.Run;
+end.

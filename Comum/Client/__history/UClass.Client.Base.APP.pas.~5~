@@ -1,0 +1,32 @@
+unit UClass.Client.Base.APP;
+
+interface
+
+uses System.SysUtils,
+     System.JSON,
+     System.Net.HttpClient,
+     System.Net.HttpClientComponent,
+
+     UClass.Client.Base,
+     UClass.Consts.URL;
+
+type
+  IClientBaseAPP = interface(IClientBase)
+  ['{12267797-0231-48EC-976C-19F556834C5C}']
+  end;
+
+  TClientBaseAPP = class(TInterfacedObject, IClientBaseAPP)
+  strict private var FInstance : IClientBase;
+  protected
+      function GetURL(aResorce : String = '') : String;
+     procedure TratarExecption(aResponse : IHTTPResponse);
+
+  private
+     constructor CreatePrivate;
+  public
+     function GetInstance : IClientBase;
+  end;
+
+implementation
+
+end.

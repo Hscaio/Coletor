@@ -1,0 +1,81 @@
+unit UClass.View.Frame.ListHistorico;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  UClass.Utils.Frame, Skia, FMX.Controls.Presentation, Skia.FMX, FMX.Layouts,
+  UClass.Model.SolicitacaoColeta, UClass.Model.Usuario, UClass.Client.Endereco,
+  UClass.Utils.Cache, System.Generics.Collections;
+
+type
+  TfrmListHistorico = class(TFrameUtil)
+    sbFundo: TScrollBox;
+    lyNotFound: TLayout;
+    skNotFound: TSkAnimatedImage;
+    Label3: TLabel;
+    Label1: TLabel;
+    lyClean: TLayout;
+    imgClean: TSkAnimatedImage;
+  private
+    { Private declarations }
+    FListSolic : TObjectList<TSolicitacaoColeta>;
+    procedure AddSolicitacao(aSolic : TSolicitacaoColeta);
+  public
+    { Public declarations }
+    constructor Create(AOwner: TComponent); override;
+     destructor Destroy; override;
+  end;
+
+var
+  frmListHistorico: TfrmListHistorico;
+
+implementation
+
+{$R *.fmx}
+
+uses UClass.View.Frame.ItemHistorico;
+
+{ TFrameUtil1 }
+
+procedure TfrmListHistorico.AddSolicitacao(aSolic: TSolicitacaoColeta);
+var LItemHist : TfrmItemHistorico;
+begin
+   lyNotFound.Visible := False;
+
+   LItemHist := TfrmItemHistorico.Create(Self);
+   LItemHist.SolictacaoColeta := aSolic;
+   LItemHist.Align := TAlignLayout.Top;
+   LItemHist.Parent := sbFundo;
+   LItemHist.Name := 'TfrmItemHistorico' + sbFundo.Content.ControlsCount.ToString;
+
+   lyClean.Parent := sbFundo;
+   lyClean.Align := TAlignLayout.Top;
+   lyClean.Position.Y := sbFundo.Height + 1;
+end;
+
+constructor TfrmListHistorico.Create(AOwner: TComponent);
+var LUsuario : TUsuario;
+    LSolic : TSolicitacaoColeta;
+begin
+   inherited;
+   LUsuario := TUsuario(TCache.GetInstance.Get(chUsuario));
+
+   if not Assigned(LUsuario) then
+     raise Exception.Create('Não foi localizado os dados do usuário para buscar os endereços!');
+
+   if LUsuario.Tipo = ttuColetor then
+      FListSolic := TClientEndereco.GetInstance.HistoricoColetor(LUsuario.Codigo)
+   else
+      FListSolic := TClientEndereco.GetInstance.HistoricoUsuario(LUsuario.Codigo);
+end;
+
+destructor TfrmListHistorico.Destroy;
+begin
+   if Assigned(FListSolic) then
+      FreeAndNil(FListSolic);
+   inherited;
+end;
+
+end.

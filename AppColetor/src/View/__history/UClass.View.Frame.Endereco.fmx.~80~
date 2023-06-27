@@ -1,0 +1,735 @@
+inherited frmEndereco: TfrmEndereco
+  Size.Width = 458.000000000000000000
+  Size.Height = 625.000000000000000000
+  object recFundoLogin: TRectangle
+    Align = Contents
+    Fill.Kind = Gradient
+    Fill.Gradient.Points = <
+      item
+        Color = xFF381552
+        Offset = 0.000000000000000000
+      end
+      item
+        Color = xFF1E123A
+        Offset = 1.000000000000000000
+      end>
+    Fill.Gradient.StartPosition.X = 0.500000000000000000
+    Fill.Gradient.StartPosition.Y = 1.000000000000000000
+    Fill.Gradient.StopPosition.X = 0.499999970197677600
+    Fill.Gradient.StopPosition.Y = 0.000000000000000000
+    Size.Width = 458.000000000000000000
+    Size.Height = 625.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Kind = None
+  end
+  object lyBot: TLayout
+    Align = Bottom
+    Margins.Left = 20.000000000000000000
+    Margins.Right = 20.000000000000000000
+    Margins.Bottom = 50.000000000000000000
+    Position.X = 20.000000000000000000
+    Position.Y = 443.000000000000000000
+    Size.Width = 418.000000000000000000
+    Size.Height = 132.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    object lyFinalizar: TLayout
+      Align = Top
+      HitTest = True
+      Margins.Top = 10.000000000000000000
+      Position.Y = 10.000000000000000000
+      Size.Width = 418.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      object rcFinalizar: TRectangle
+        Align = Contents
+        Fill.Kind = Gradient
+        Fill.Gradient.Points = <
+          item
+            Color = xFF1EFE3A
+            Offset = 0.000000000000000000
+          end
+          item
+            Color = xFF0F801C
+            Offset = 1.000000000000000000
+          end
+          item
+            Color = xFF107F1C
+            Offset = 1.055900573730469000
+          end>
+        Fill.Gradient.StartPosition.Y = 0.500000000000000000
+        Fill.Gradient.StopPosition.X = 1.000000000000000000
+        Fill.Gradient.StopPosition.Y = 0.500000000000000000
+        HitTest = False
+        Opacity = 0.800000011920929000
+        Size.Width = 418.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 10.000000000000000000
+        YRadius = 10.000000000000000000
+      end
+      object lbFinalizar: TLabel
+        Align = Contents
+        StyledSettings = []
+        Size.Width = 418.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Family = 'Roboto'
+        TextSettings.Font.Size = 15.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.FontColor = claWhite
+        TextSettings.HorzAlign = Center
+        Text = 'Finalizar'
+        TabOrder = 1
+      end
+    end
+    object lyCancelar: TLayout
+      Align = Top
+      HitTest = True
+      Margins.Top = 10.000000000000000000
+      Margins.Bottom = 10.000000000000000000
+      Position.Y = 70.000000000000000000
+      Size.Width = 418.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      OnClick = lyCancelarClick
+      object rcCancelar: TRectangle
+        Align = Contents
+        Fill.Kind = Gradient
+        Fill.Gradient.Points = <
+          item
+            Color = xFFFE1E1E
+            Offset = 0.000000000000000000
+          end
+          item
+            Color = xFF800F0F
+            Offset = 1.000000000000000000
+          end
+          item
+            Color = xFF107F1C
+            Offset = 1.055900573730469000
+          end>
+        Fill.Gradient.StartPosition.Y = 0.500000000000000000
+        Fill.Gradient.StopPosition.X = 1.000000000000000000
+        Fill.Gradient.StopPosition.Y = 0.500000000000000000
+        HitTest = False
+        Opacity = 0.800000011920929000
+        Size.Width = 418.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 10.000000000000000000
+        YRadius = 10.000000000000000000
+      end
+      object lbCancelar: TLabel
+        Align = Contents
+        StyledSettings = []
+        Size.Width = 418.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Family = 'Roboto'
+        TextSettings.Font.Size = 15.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.FontColor = claWhite
+        TextSettings.HorzAlign = Center
+        Text = 'Cancelar'
+        TabOrder = 1
+      end
+    end
+  end
+  object lyMenu: TLayout
+    Align = Top
+    Margins.Top = 15.000000000000000000
+    Position.Y = 15.000000000000000000
+    Size.Width = 458.000000000000000000
+    Size.Height = 41.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+  end
+  object lyTop: TLayout
+    Align = Top
+    Margins.Left = 20.000000000000000000
+    Margins.Top = 10.000000000000000000
+    Margins.Right = 20.000000000000000000
+    Position.X = 20.000000000000000000
+    Position.Y = 66.000000000000000000
+    Size.Width = 418.000000000000000000
+    Size.Height = 262.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    object lyLogo: TLayout
+      Align = Top
+      Size.Width = 418.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 4
+      object lbEndereco: TLabel
+        Align = Contents
+        StyledSettings = []
+        Size.Width = 418.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Family = 'Roboto'
+        TextSettings.Font.Size = 24.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.FontColor = claWhite
+        TextSettings.HorzAlign = Center
+        Text = 'Endere'#231'o'
+        TabOrder = 1
+      end
+    end
+    object lyCidadeEstado: TLayout
+      Align = Top
+      Margins.Top = 10.000000000000000000
+      Margins.Bottom = 10.000000000000000000
+      Position.Y = 60.000000000000000000
+      Size.Width = 418.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      object lyCidade: TLayout
+        Align = Client
+        Margins.Right = 20.000000000000000000
+        Size.Width = 305.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        object rcCidade: TRectangle
+          Align = Contents
+          Fill.Color = xFF8108C7
+          Size.Width = 305.000000000000000000
+          Size.Height = 50.000000000000000000
+          Size.PlatformDefault = False
+          Stroke.Kind = None
+          XRadius = 25.000000000000000000
+          YRadius = 25.000000000000000000
+        end
+        object edCidade: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = Client
+          StyleLookup = 'transparentedit'
+          TabOrder = 1
+          TextSettings.Font.Family = 'Roboto'
+          TextSettings.Font.Size = 15.000000000000000000
+          TextSettings.FontColor = claWhite
+          Margins.Left = 25.000000000000000000
+          Margins.Right = 25.000000000000000000
+          Size.Width = 255.000000000000000000
+          Size.Height = 50.000000000000000000
+          Size.PlatformDefault = False
+          TextPrompt = 'Cidade*'
+          StyledSettings = [Style]
+        end
+      end
+      object lyEstado: TLayout
+        Align = Right
+        Position.X = 325.000000000000000000
+        Size.Width = 93.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        object rcEstado: TRectangle
+          Align = Contents
+          Fill.Color = xFF8108C7
+          Size.Width = 93.000000000000000000
+          Size.Height = 50.000000000000000000
+          Size.PlatformDefault = False
+          Stroke.Kind = None
+          XRadius = 25.000000000000000000
+          YRadius = 25.000000000000000000
+        end
+        object cbEstado: TComboBox
+          Align = Contents
+          ItemIndex = 17
+          Margins.Left = 20.000000000000000000
+          Margins.Right = 20.000000000000000000
+          Size.Width = 53.000000000000000000
+          Size.Height = 50.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = 'comboboxstyle'
+          TabOrder = 0
+          object lbiAC: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 16.000000000000000000
+            Position.Y = 16.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 0
+            Text = 'AC'
+          end
+          object lbiAL: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 1
+            Text = 'AL'
+          end
+          object lbiAM: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 24.000000000000000000
+            Position.Y = 24.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 26
+            Text = 'AM'
+          end
+          object lbiAP: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 25
+            Text = 'AP'
+          end
+          object lbiBA: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 24
+            Text = 'BA'
+          end
+          object lbiCE: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 7
+            Text = 'CE'
+          end
+          object lbiDF: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 8.000000000000000000
+            Position.Y = 8.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 23
+            Text = 'DF'
+          end
+          object lbiES: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 22
+            Text = 'ES'
+          end
+          object lbiGO: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 21
+            Text = 'GO'
+          end
+          object lbiMA: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 20
+            Text = 'MA'
+          end
+          object lbiMG: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 19
+            Text = 'MG'
+          end
+          object lbiMS: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 18
+            Text = 'MS'
+          end
+          object lbiMT: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 17
+            Text = 'MT'
+          end
+          object lbiPA: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 16
+            Text = 'PA'
+          end
+          object lbiPB: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 15
+            Text = 'PB'
+          end
+          object lbiPE: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 6
+            Text = 'PE'
+          end
+          object lbiPI: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 2
+            Text = 'PI'
+          end
+          object lbiPR: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 3
+            Text = 'PR'
+          end
+          object lbiRJ: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 4
+            Text = 'RJ'
+          end
+          object lbiRN: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 5
+            Text = 'RN'
+          end
+          object lbiRO: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 14
+            Text = 'RO'
+          end
+          object lbiRR: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 13
+            Text = 'RR'
+          end
+          object lbiRS: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 12
+            Text = 'RS'
+          end
+          object lbiSC: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 11
+            Text = 'SC'
+          end
+          object lbiSE: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 10
+            Text = 'SE'
+          end
+          object lbiSP: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 9
+            Text = 'SP'
+          end
+          object lbiTO: TListBoxItem
+            TextSettings.FontColor = claWhite
+            TextSettings.HorzAlign = Center
+            StyledSettings = [Family, Size, Style]
+            IsSelected = True
+            Position.X = 31.000000000000000000
+            Position.Y = 31.000000000000000000
+            Size.Width = 19.000000000000000000
+            Size.Height = 19.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 8
+            Text = 'TO'
+          end
+        end
+      end
+    end
+    object lyBairro: TLayout
+      Align = Top
+      Margins.Top = 10.000000000000000000
+      Margins.Bottom = 10.000000000000000000
+      Position.Y = 130.000000000000000000
+      Size.Width = 418.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      object rcBairro: TRectangle
+        Align = Contents
+        Fill.Color = xFF8108C7
+        Size.Width = 418.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 25.000000000000000000
+        YRadius = 25.000000000000000000
+      end
+      object edBairro: TEdit
+        Touch.InteractiveGestures = [LongTap, DoubleTap]
+        Align = Client
+        StyleLookup = 'transparentedit'
+        TabOrder = 2
+        TextSettings.Font.Family = 'Roboto'
+        TextSettings.Font.Size = 15.000000000000000000
+        TextSettings.FontColor = claWhite
+        Margins.Left = 25.000000000000000000
+        Margins.Right = 25.000000000000000000
+        Size.Width = 368.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        TextPrompt = 'Bairro*'
+        StyledSettings = [Style]
+      end
+    end
+    object lyEndereco: TLayout
+      Align = Top
+      Margins.Top = 10.000000000000000000
+      Margins.Bottom = 10.000000000000000000
+      Position.Y = 200.000000000000000000
+      Size.Width = 418.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object rcEndereco: TRectangle
+        Align = Contents
+        Fill.Color = xFF8108C7
+        Size.Width = 418.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 25.000000000000000000
+        YRadius = 25.000000000000000000
+      end
+      object edEndereco: TEdit
+        Touch.InteractiveGestures = [LongTap, DoubleTap]
+        Align = Top
+        StyleLookup = 'transparentedit'
+        TabOrder = 2
+        TextSettings.Font.Family = 'Roboto'
+        TextSettings.Font.Size = 15.000000000000000000
+        TextSettings.FontColor = claWhite
+        Position.X = 25.000000000000000000
+        Margins.Left = 25.000000000000000000
+        Margins.Right = 25.000000000000000000
+        Size.Width = 368.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        TextPrompt = 'Endere'#231'o*'
+        StyledSettings = [Style]
+      end
+    end
+    object lyComplementoNumero: TLayout
+      Align = Top
+      Margins.Top = 10.000000000000000000
+      Margins.Bottom = 10.000000000000000000
+      Position.Y = 270.000000000000000000
+      Size.Width = 418.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object lyNumero: TLayout
+        Align = Left
+        Size.Width = 113.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 3
+        object rcNumero: TRectangle
+          Align = Contents
+          Fill.Color = xFF8108C7
+          Size.Width = 113.000000000000000000
+          Size.Height = 50.000000000000000000
+          Size.PlatformDefault = False
+          Stroke.Kind = None
+          XRadius = 25.000000000000000000
+          YRadius = 25.000000000000000000
+        end
+        object edNumero: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = Top
+          StyleLookup = 'transparentedit'
+          TabOrder = 2
+          TextSettings.Font.Family = 'Roboto'
+          TextSettings.Font.Size = 15.000000000000000000
+          TextSettings.FontColor = claWhite
+          Position.X = 25.000000000000000000
+          Margins.Left = 25.000000000000000000
+          Margins.Right = 5.000000000000000000
+          Size.Width = 83.000000000000000000
+          Size.Height = 50.000000000000000000
+          Size.PlatformDefault = False
+          TextPrompt = 'N'#250'mero*'
+          StyledSettings = [Style]
+        end
+      end
+      object lyComplemento: TLayout
+        Align = Client
+        Margins.Left = 25.000000000000000000
+        Size.Width = 280.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        object rcComplemento: TRectangle
+          Align = Contents
+          Fill.Color = xFF8108C7
+          Size.Width = 280.000000000000000000
+          Size.Height = 50.000000000000000000
+          Size.PlatformDefault = False
+          Stroke.Kind = None
+          XRadius = 25.000000000000000000
+          YRadius = 25.000000000000000000
+        end
+        object edComplemento: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = Top
+          StyleLookup = 'transparentedit'
+          TabOrder = 2
+          TextSettings.Font.Family = 'Roboto'
+          TextSettings.Font.Size = 15.000000000000000000
+          TextSettings.FontColor = claWhite
+          Position.X = 25.000000000000000000
+          Margins.Left = 25.000000000000000000
+          Margins.Right = 5.000000000000000000
+          Size.Width = 250.000000000000000000
+          Size.Height = 50.000000000000000000
+          Size.PlatformDefault = False
+          TextPrompt = 'Complemento'
+          StyledSettings = [Style]
+        end
+      end
+    end
+  end
+end

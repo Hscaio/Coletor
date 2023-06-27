@@ -1,0 +1,559 @@
+unit UClass.Utils.Notificacao;
+
+interface
+
+uses System.SysUtils, System.UITypes, FMX.Types, FMX.Controls, FMX.StdCtrls,
+     FMX.Objects, FMX.Effects, FMX.Layouts, FMX.Forms, FMX.Graphics, FMX.Ani,
+     FMX.VirtualKeyboard, FMX.Platform, System.UIConsts, FMX.Maps;
+
+const
+   ColorRed = $FF800F0F;
+   ColorGreen = $FF0F801C;
+type
+  TMessageResponse = (mrOk, mrYes, mrNo);
+  TMessageType = (mtInformation, mtConfirmation, mtWarning, mtError);
+
+  IDioaloger = interface
+  ['{EDB0C8EC-7D26-41C2-AC61-96EB0D304BFE}']
+     procedure SetMapView(const Value: TMapView);
+      function GetMapView: TMapView;
+      property MapView : TMapView read GetMapView write SetMapView;
+
+     procedure ShowLoad(const aMsg : String = 'Aguarde');
+     procedure HideLoad;
+     procedure ToastMessage(const aMsg: string;
+                            aColor : Cardinal = $FF0F801C;
+                            aAlign : TAlignLayout = TAlignLayout.Top;
+                            aColorFont : Cardinal = $FFFFFFFF;
+                            aTime : Integer = 4);
+     procedure ShowMessage(aMsg: string;
+                           aMessageType: TMessageType = mtInformation;
+                           aCallBack: TProc<TMessageResponse> = nil;
+                           const aWidth: Single = -1);
+
+  end;
+
+  TDialoger = class(TInterfacedObject, IDioaloger)
+  strict private class var FInstance : IDioaloger;
+  private
+     FMapView: TMapView;
+
+     FLayout : TLayout;
+     FFundo : TRectangle;
+     FArco : TArc;
+     FMensagem : TLabel;
+     FAnimacao : TFloatAnimation;
+
+     FRctBackground : TRectangle;
+     FRctMessageBackground : TRectangle;
+
+
+     FCallBack : TProc<TMessageResponse>;
+
+     constructor CreatePrivate;
+
+     function MessageResponseToString(aResp : TMessageResponse) : String;
+
+     procedure HideMapView(aVisible : Boolean);
+     procedure DeleteMessage(Sender: TObject);
+     procedure OnClickButton(Sender: TObject);
+     procedure HideKeyboard;
+     procedure AddButton(aLayout : TLayout; aMessageResponse: TMessageResponse);
+
+     procedure SetMapView(const Value: TMapView);
+      function GetMapView: TMapView;
+  public
+     property MapView : TMapView read GetMapView write SetMapView;
+
+     class function GetInstance : IDioaloger;
+
+     procedure ShowLoad(const aMsg : String = 'Aguarde');
+     procedure HideLoad;
+     procedure ToastMessage(const aMsg: string;
+                            aColor : Cardinal = $FF0F801C;
+                            aAlign : TAlignLayout = TAlignLayout.Top;
+                            aColorFont : Cardinal = $FFFFFFFF;
+                            aTime : Integer = 4);
+     procedure ShowMessage(aMsg: string;
+                           aMessageType: TMessageType = mtInformation;
+                           aCallBack: TProc<TMessageResponse> = nil;
+                           const aWidth: Single = -1);
+  end;
+
+const TConstMessageResponse : Array of String = ['OK','Sim','Não'];
+
+implementation
+
+uses
+  System.Threading;
+
+{ TDialoger }
+
+class function TDialoger.GetInstance: IDioaloger;
+begin
+   if not Assigned(FInstance) then
+      FInstance := TDialoger.CreatePrivate;
+
+   Result := FInstance;
+end;
+
+function TDialoger.GetMapView: TMapView;
+begin
+   Result := FMapView;
+end;
+
+procedure TDialoger.HideKeyboard;
+var LService: IFMXVirtualKeyboardService;
+begin
+   TPlatformServices.
+      Current.
+         SupportsPlatformService(
+            IFMXVirtualKeyboardService,
+            IInterface(LService)
+         );
+
+    if (LService <> nil) then
+        LService.HideVirtualKeyboard;
+end;
+
+procedure TDialoger.HideLoad;
+begin
+   if Assigned(FLayout) then
+   begin
+      try
+         if Assigned(FMensagem) then
+            FMensagem.DisposeOf;
+
+         if Assigned(FAnimacao) then
+            FAnimacao.DisposeOf;
+
+         if Assigned(FArco) then
+            FArco.DisposeOf;
+
+         if Assigned(FFundo) then
+            FFundo.DisposeOf;
+
+         if Assigned(FLayout) then
+            FLayout.DisposeOf;
+      except
+      end;
+   end;
+
+   FMensagem := nil;
+   FAnimacao := nil;
+   FArco := nil;
+   FLayout := nil;
+   FFundo := nil;
+
+   HideMapView(True);
+end;
+
+procedure TDialoger.HideMapView(aVisible: Boolean);
+begin
+   if Assigned(FMapView) then
+      FMapView.Visible := aVisible;
+end;
+
+function TDialoger.MessageResponseToString(aResp: TMessageResponse): String;
+begin
+   case aResp of
+      mrOk  : Result := 'OK';
+      mrYes : Result := 'Sim';
+      mrNo  : Result := 'Não';
+   end;
+end;
+
+procedure TDialoger.OnClickButton(Sender: TObject);
+var LResponse : TMessageResponse;
+begin
+   if (Sender is TLabel) then
+   begin
+
+      with TLabel(Sender) do
+      begin
+         if Text = MessageResponseToString(TMessageResponse.mrOk) then
+            LResponse := TMessageResponse.mrOk
+         else
+         if Text = MessageResponseToString(TMessageResponse.mrYes) then
+            LResponse := TMessageResponse.mrYes
+         else
+         if Text = MessageResponseToString(TMessageResponse.mrNo) then
+            LResponse := TMessageResponse.mrNo
+         else
+            Exit;
+      end;
+
+      if Assigned(FCallBack) then
+         FCallBack(LResponse);
+   end;
+
+   DeleteMessage(Sender);
+end;
+
+procedure TDialoger.SetMapView(const Value: TMapView);
+begin
+  FMapView := Value;
+end;
+
+procedure TDialoger.ShowLoad(const aMsg: string);
+begin
+   HideMapView(False);
+
+   FFundo := TRectangle.Create(Application.MainForm);
+   FFundo.Opacity := 0;
+   FFundo.Parent := Application.MainForm;
+   FFundo.Visible := true;
+   FFundo.Align := TAlignLayout.Contents;
+   FFundo.Fill.Color := TAlphaColorRec.Black;
+   FFundo.Fill.Kind := TBrushKind.Solid;
+   FFundo.Stroke.Kind := TBrushKind.None;
+   FFundo.Visible := true;
+
+   FLayout := TLayout.Create(Application.MainForm);
+   FLayout.Opacity := 0;
+   FLayout.Parent := Application.MainForm;
+   FLayout.Visible := true;
+   FLayout.Align := TAlignLayout.Contents;
+   FLayout.Width := 250;
+   FLayout.Height := 78;
+   FLayout.Visible := true;
+
+   FArco := TArc.Create(Application.MainForm);
+   FArco.Visible := true;
+   FArco.Parent := FLayout;
+   FArco.Align := TAlignLayout.Center;
+   FArco.Margins.Bottom := 55;
+   FArco.Width := 25;
+   FArco.Height := 25;
+   FArco.EndAngle := 280;
+   FArco.Stroke.Color := $FFFEFFFF;
+   FArco.Stroke.Thickness := 2;
+   FArco.Position.X := trunc((FLayout.Width - FArco.Width) / 2);
+   FArco.Position.Y := 0;
+
+   FAnimacao := TFloatAnimation.Create(Application.MainForm);
+   FAnimacao.Parent := FArco;
+   FAnimacao.StartValue := 0;
+   FAnimacao.StopValue := 360;
+   FAnimacao.Duration := 0.8;
+   FAnimacao.Loop := true;
+   FAnimacao.PropertyName := 'RotationAngle';
+   FAnimacao.AnimationType := TAnimationType.InOut;
+   FAnimacao.Interpolation := TInterpolationType.Linear;
+   FAnimacao.Start;
+
+   FMensagem := TLabel.Create(Application.MainForm);
+   FMensagem.Parent := FLayout;
+   FMensagem.Align := TAlignLayout.Center;
+   FMensagem.Margins.Top := 60;
+   FMensagem.Font.Size := 13;
+   FMensagem.Height := 70;
+   FMensagem.Width := Application.MainForm.Width - 100;
+   FMensagem.FontColor := $FFFEFFFF;
+   FMensagem.TextSettings.HorzAlign := TTextAlign.Center;
+   FMensagem.TextSettings.VertAlign := TTextAlign.Leading;
+   FMensagem.StyledSettings := [TStyledSetting.Family, TStyledSetting.Style];
+   FMensagem.Text := aMsg;
+   FMensagem.VertTextAlign := TTextAlign.Leading;
+   FMensagem.Trimming := TTextTrimming.None;
+   FMensagem.TabStop := false;
+   FMensagem.SetFocus;
+
+   FFundo.AnimateFloat('Opacity', 0.7);
+   FLayout.AnimateFloat('Opacity', 1);
+   FLayout.BringToFront;
+
+   HideKeyboard;
+end;
+
+procedure TDialoger.ShowMessage(aMsg: string; aMessageType: TMessageType;
+  aCallBack: TProc<TMessageResponse>; const aWidth: Single);
+var
+  LLytButton: TLayout;
+  LLblMessage: TLabel;
+  LVtsMessage : TVertScrollBox;
+begin
+  HideMapView(False);
+  HideKeyboard();
+  FCallBack := aCallBack;
+
+  FRctBackground := TRectangle.Create(nil);
+  FRctBackground.Visible := False;
+  FRctBackground.Fill.Color := StringToAlphaColor('Black');
+  FRctBackground.Align := TAlignLayout.Contents;
+  FRctBackground.HitTest := True;
+  FRctBackground.Opacity := 0.5;
+  FRctBackground.OnClick := DeleteMessage;
+
+  FRctMessageBackground := TRectangle.Create(nil);
+  FRctMessageBackground.Visible := False;
+  FRctMessageBackground.Height := 73;
+  FRctMessageBackground.Width := Application.MainForm.ClientWidth - 60;
+  FRctMessageBackground.XRadius := 10;
+  FRctMessageBackground.YRadius := 10;
+  FRctMessageBackground.Anchors := [];
+  FRctMessageBackground.Align := TAlignLayout.Center;
+  FRctMessageBackground.Fill.Color := $FF8108C7;
+  FRctMessageBackground.Stroke.Kind := TBrushKind.None;
+
+  if AWidth <> -1 then
+     FRctMessageBackground.Width := AWidth;
+
+  LVtsMessage := TVertScrollBox.Create(FRctMessageBackground);
+  with LVtsMessage do
+  begin
+     Parent         := FRctMessageBackground;
+     Align          := TAlignLayout.Client;
+     Name           := 'vtsCustomMessage';
+     ShowScrollBars := True;
+  end;
+
+  LLblMessage := TLabel.Create(FRctMessageBackground);
+  with LLblMessage do
+  begin
+    Parent := LVtsMessage;
+    Align := TAlignLayout.Bottom;
+    Margins.Left := 10;
+    Margins.Top := 10;
+    Margins.Right := 10;
+    Font.Size := 14;
+    StyledSettings := [ { TStyledSetting.ssFamily,
+      TStyledSetting.ssStyle,
+      TStyledSetting.ssFontColor } ];
+    Align := TAlignLayout.Scale;
+    StyleLookup := 'embossedlabel';
+    Trimming := TTextTrimming.Character;
+    Name := 'lblCustomMessageMessage';
+    TextSettings.HorzAlign := TTextAlign.Center;
+    WordWrap := True;
+    Text := AMsg;
+    AutoSize := False;
+    AutoSize := True;
+    Align := TAlignLayout.Top;
+    TextSettings.FontColor := StringToAlphaColor('White');
+    TextSettings.Font.Family := 'Roboto';
+    TextSettings.Font.Style := [TFontStyle.fsBold];
+  end;
+
+  with TShadowEffect.Create(FRctMessageBackground) do
+  begin
+    Parent := FRctMessageBackground;
+    Enabled := True;
+  end;
+
+  LLytButton := TLayout.Create(FRctMessageBackground);
+  with LLytButton do
+  begin
+    Parent := FRctMessageBackground;
+    Align := TAlignLayout.Bottom;
+    Margins.Top := 10;
+    Margins.Bottom := 10;
+    Height := 50;
+
+    // Pode ser que criemos um tipo que tem tamanho diferente
+    case AMessageType of
+      mtInformation, mtConfirmation, mtError:
+        begin
+          Margins.Left := 50;
+          Margins.Right := 50;
+        end;
+    end;
+  end;
+
+  case AMessageType of
+    mtInformation, mtWarning, mtError:
+      AddButton(LLytButton, TMessageResponse.mrOk);
+    mtConfirmation:
+      begin
+        AddButton(LLytButton, TMessageResponse.mrYes);
+        AddButton(LLytButton, TMessageResponse.mrNo);
+      end;
+  end;
+
+  FRctBackground.Opacity := 0;
+  FRctMessageBackground.Opacity := 0;
+
+  FRctBackground.Visible := True;
+  FRctMessageBackground.Visible := True;
+
+  FRctBackground.Parent := Application.MainForm;
+  FRctMessageBackground.Parent := Application.MainForm;
+
+  LVtsMessage.RecalcSize;
+  LLblMessage.RecalcSize;
+  LLytButton.RecalcSize;
+  LVtsMessage.ScrollTo(0,0);
+
+  FRctMessageBackground.Height := LLblMessage.Height + LLblMessage.Margins.Top +
+    LLblMessage.Margins.Bottom + LLytButton.Height + LLytButton.Margins.Top +
+    LLytButton.Margins.Bottom + 0;
+
+  if FRctMessageBackground.Height > Application.MainForm.Height then
+     FRctMessageBackground.Height := Application.MainForm.Height - 100;
+
+  FRctBackground.BringToFront;
+  FRctMessageBackground.BringToFront;
+
+  FRctBackground.AnimateFloat('opacity', 0.5);
+  FRctMessageBackground.AnimateFloat('opacity', 1);
+
+  FRctMessageBackground.SetFocus;
+end;
+
+procedure TDialoger.AddButton(aLayout: TLayout;
+  aMessageResponse: TMessageResponse);
+var LRecButton : TRectangle;
+    LLabButton : TLabel;
+begin
+   LRecButton := TRectangle.Create(aLayout);
+   LRecButton.Opacity := 0.8;
+   LRecButton.Parent := aLayout;
+   LRecButton.Fill.Kind := TBrushKind.Gradient;
+   LRecButton.Stroke.Kind := TBrushKind.None;
+   LRecButton.XRadius := 12;
+   LRecButton.YRadius := 12;
+   LRecButton.Visible := True;
+   LRecButton.Width := 100;
+   LRecButton.HitTest := False;
+
+   LLabButton := TLabel.Create(LRecButton);
+   with LLabButton do
+   begin
+      Parent := LRecButton;
+      Align := TAlignLayout.Contents;
+      Font.Size := 15;
+      StyledSettings := [];
+      Trimming := TTextTrimming.Character;
+      TextSettings.HorzAlign := TTextAlign.Center;
+      WordWrap := True;
+      AutoSize := False;
+      TextSettings.FontColor := StringToAlphaColor('White');
+      TextSettings.Font.Family := 'Roboto';
+      TextSettings.Font.Style := [TFontStyle.fsBold];
+      LLabButton.Text := MessageResponseToString(aMessageResponse);
+      HitTest := True;
+      OnClick := OnClickButton;
+   end;
+
+   case aMessageResponse of
+      mrOk:
+         begin
+            LRecButton.Fill.Gradient.Color  := $FF1EFE3A;
+            LRecButton.Fill.Gradient.Color1 := $FF0F801C;
+            LRecButton.Align := TAlignLayout.Center;
+         end;
+      mrYes:
+         begin
+            LRecButton.Fill.Gradient.Color  := $FF1EFE3A;
+            LRecButton.Fill.Gradient.Color1 := $FF0F801C;
+            LRecButton.Align := TAlignLayout.Left;
+         end;
+      mrNo:
+         begin
+            LRecButton.Fill.Gradient.Color  := $FFFE1E1E;
+            LRecButton.Fill.Gradient.Color1 := $FF800F0F;
+            LRecButton.Align := TAlignLayout.Right;
+         end;
+   end;
+end;
+
+constructor TDialoger.CreatePrivate;
+begin
+
+end;
+
+procedure TDialoger.DeleteMessage(Sender: TObject);
+begin
+   try
+      if Assigned(FRctBackground) then
+         FRctBackground.Visible := False;
+
+      if Assigned(FRctMessageBackground) then
+         FRctMessageBackground.DisposeOf;
+
+      if Assigned(FRctBackground) then
+         FRctBackground.DisposeOf;
+   except
+   end;
+
+  FRctBackground := nil;
+  FRctMessageBackground := nil;
+  HideMapView(True);
+end;
+
+procedure TDialoger.ToastMessage(const aMsg: string;
+  aColor : Cardinal; aAlign : TAlignLayout;
+  aColorFont : Cardinal; aTime : Integer);
+var LLayoutMessage : TLayout;
+    LRctBackground : TRectangle;
+    LMensagemToast : TLabel;
+    LAnimacaoToast : TFloatAnimation;
+    LTask : ITask;
+begin
+   LLayoutMessage := TLayout.Create(nil);
+   LLayoutMessage.Opacity := 1;
+   LLayoutMessage.Parent := Application.MainForm;
+   LLayoutMessage.Visible := true;
+   LLayoutMessage.Align := TAlignLayout.Contents;
+   LLayoutMessage.Visible := true;
+   LLayoutMessage.HitTest := false;
+   LLayoutMessage.BringToFront;
+   LLayoutMessage.HitTest := False;
+
+   LRctBackground := TRectangle.Create(LLayoutMessage);
+   LRctBackground.Opacity := 0;
+   LRctBackground.Parent := LLayoutMessage;
+   LRctBackground.Align := aAlign;
+   LRctBackground.Margins.Left := 20;
+   LRctBackground.Margins.Right := 20;
+   LRctBackground.Margins.Bottom := 20;
+   LRctBackground.Margins.Top := 20;
+   LRctBackground.Fill.Color := aColor;
+   LRctBackground.Fill.Kind := TBrushKind.Solid;
+   LRctBackground.Stroke.Kind := TBrushKind.None;
+   LRctBackground.XRadius := 12;
+   LRctBackground.YRadius := 12;
+   LRctBackground.Visible := True;
+   LRctBackground.HitTest := False;
+
+   LMensagemToast := TLabel.Create(LLayoutMessage);
+   LMensagemToast.Parent := LRctBackground;
+   LMensagemToast.Align := TAlignLayout.Client;
+   LMensagemToast.Font.Size := 13;
+   LMensagemToast.FontColor := aColorFont;
+   LMensagemToast.Margins.Left := 10;
+   LMensagemToast.Margins.Right := 10;
+   LMensagemToast.Margins.Bottom := 10;
+   LMensagemToast.Margins.Top := 10;
+   LMensagemToast.TextSettings.HorzAlign := TTextAlign.Center;
+   LMensagemToast.TextSettings.VertAlign := TTextAlign.Center;
+   LMensagemToast.StyledSettings := [TStyledSetting.Family, TStyledSetting.Style];
+   LMensagemToast.Text := aMsg;
+   LMensagemToast.VertTextAlign := TTextAlign.Center;
+   LMensagemToast.Trimming := TTextTrimming.None;
+   LMensagemToast.TabStop := False;
+   LMensagemToast.TextSettings.Font.Family := 'Roboto';
+   LMensagemToast.TextSettings.Font.Style := [TFontStyle.fsBold];
+   LMensagemToast.HitTest := False;
+
+   LRctBackground.Height := LMensagemToast.Canvas.TextHeight(aMsg) * 2.5;
+
+   if LRctBackground.Height < 40 then
+      LRctBackground.Height := 40;
+
+   LAnimacaoToast := TFloatAnimation.Create(LLayoutMessage);
+   LAnimacaoToast.Parent := LRctBackground;
+   LAnimacaoToast.StartValue := 0;
+   LAnimacaoToast.StopValue := 3;
+   LAnimacaoToast.Duration := aTime / 2;
+   LAnimacaoToast.Delay := 0;
+   LAnimacaoToast.AutoReverse := true;
+   LAnimacaoToast.PropertyName := 'Opacity';
+   LAnimacaoToast.AnimationType := TAnimationType.&In;
+   LAnimacaoToast.Interpolation := TInterpolationType.Linear;
+
+   HideKeyboard;
+   LAnimacaoToast.Enabled := True;
+end;
+
+end.

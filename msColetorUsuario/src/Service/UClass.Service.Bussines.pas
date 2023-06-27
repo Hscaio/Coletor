@@ -1,0 +1,101 @@
+unit UClass.Service.Bussines;
+
+interface
+
+uses System.SysUtils,
+     UClass.DAO.Base,
+     UClass.Model.Usuario,
+     UClass.DAO.Usuario,
+     UClass.DAO.Endereco,
+     UClass.DAO.SolicitacaoColeta;
+
+type
+   IBussinessService = interface
+   ['{69750940-7D18-46ED-9C3F-A88498EAF4A1}']
+      procedure Start;
+      procedure Stop;
+   end;
+
+   TBussinessService = class(TInterfacedObject, IBussinessService)
+   strict private class var
+      FInstance : IBussinessService;
+   private
+      procedure RunDDL;
+
+      constructor CreatePrivate();
+   public
+      class function GetInstance : IBussinessService;
+
+      procedure Start;
+      procedure Stop;
+   end;
+
+implementation
+
+{ TBussinesService }
+
+constructor TBussinessService.CreatePrivate;
+begin
+
+end;
+
+class function TBussinessService.GetInstance: IBussinessService;
+begin
+   if not Assigned(FInstance) then
+      FInstance := TBussinessService.CreatePrivate;
+
+   Result := FInstance;
+end;
+
+procedure TBussinessService.RunDDL;
+
+   procedure ExecSolicitacaoColeta;
+   var LDAO : TDAOSolicitacaoColeta;
+   begin
+      LDAO := TDAOSolicitacaoColeta.Create;
+      try
+         LDAO.ExecDDL;
+      finally
+         FreeAndNil(LDAO);
+      end;
+   end;
+
+   procedure ExecUsuario;
+   var LDAO : TDAOUsuario;
+   begin
+      LDAO := TDAOUsuario.Create;
+      try
+         LDAO.ExecDDL;
+      finally
+         FreeAndNil(LDAO);
+      end;
+   end;
+
+   procedure ExecEndereco;
+   var LDAO : TDAOEndereco;
+   begin
+      LDAO := TDAOEndereco.Create;
+      try
+         LDAO.ExecDDL;
+      finally
+         FreeAndNil(LDAO);
+      end;
+   end;
+
+begin
+   ExecUsuario;
+   ExecEndereco;
+   ExecSolicitacaoColeta;
+end;
+
+procedure TBussinessService.Start;
+begin
+   RunDDL;
+end;
+
+procedure TBussinessService.Stop;
+begin
+
+end;
+
+end.

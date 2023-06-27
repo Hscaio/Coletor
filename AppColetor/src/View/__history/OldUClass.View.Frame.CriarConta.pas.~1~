@@ -1,0 +1,145 @@
+unit UClass.View.Frame.CriarConta;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  FMX.Objects, FMX.Layouts, FMX.Controls.Presentation, FMX.Edit,
+  UClass.Client.Usuario, UClass.Model.StatusResponse,
+  UClass.Utils.Frame;
+
+type
+  TfrmCriarConta = class(TFrame)
+    recFundoLogin: TRectangle;
+    lyMenu: TLayout;
+    imgBack: TImage;
+    lyBot: TLayout;
+    lyCriarConta: TLayout;
+    rcCriarConta: TRectangle;
+    lbProximo: TLabel;
+    lyTop: TLayout;
+    lyLogo: TLayout;
+    lbEntrar: TLabel;
+    lyEmail: TLayout;
+    rcEmail: TRectangle;
+    edEmail: TEdit;
+    lySenha: TLayout;
+    rcSenha: TRectangle;
+    edSenha: TEdit;
+    lyConfirmarSenha: TLayout;
+    rcConfirmarSenha: TRectangle;
+    edConfirmarSenha: TEdit;
+    lyCPF: TLayout;
+    rcCPF: TRectangle;
+    edCPF: TEdit;
+    lyAviso: TLayout;
+    rcAviso: TRectangle;
+    lbAviso: TLabel;
+    procedure edCPFTyping(Sender: TObject);
+    procedure lyCriarContaClick(Sender: TObject);
+    procedure imgBackClick(Sender: TObject);
+  private
+    { Private declarations }
+     function ValidarDados : Boolean;
+  public
+    { Public declarations }
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+implementation
+
+{$R *.fmx}
+
+uses UClass.Utils.Format;
+
+constructor TfrmCriarConta.Create(AOwner: TComponent);
+begin
+   inherited;
+   lyAviso.Visible := False;
+end;
+
+procedure TfrmCriarConta.edCPFTyping(Sender: TObject);
+begin
+   Formatar(Sender,TFormato.CPF);
+end;
+
+procedure TfrmCriarConta.imgBackClick(Sender: TObject);
+begin
+   AnteriorTab;
+end;
+
+procedure TfrmCriarConta.lyCriarContaClick(Sender: TObject);
+begin
+   if ValidarDados then
+      ProximoTab;
+end;
+
+function TfrmCriarConta.ValidarDados : Boolean;
+var LResponse : TStatusResponse;
+
+   function CampoInformados : Boolean;
+   begin
+      Result := True;
+
+      if CampoIsEmpty(edEmail,rcEmail) then
+         Result := False;
+
+      if CampoIsEmpty(edCPF,rcCPF) then
+         Result := False;
+
+      if CampoIsEmpty(edSenha,rcSenha) then
+         Result := False;
+
+      if CampoIsEmpty(edConfirmarSenha,rcConfirmarSenha) then
+         Result := False;
+
+      if not Result then
+      begin
+         lyAviso.Visible := True;
+         lbAviso.Text := 'Há campos obrigatórios não informados';
+      end;
+   end;
+
+   function SenhaConfirmada : Boolean;
+   begin
+      Result := edSenha.Text = edConfirmarSenha.Text;
+
+      CampoInvalido(edSenha,rcSenha,Result);
+      CampoInvalido(edConfirmarSenha,rcConfirmarSenha,Result);
+
+      if not Result then
+      begin
+         lyAviso.Visible := True;
+         lbAviso.Text := 'Confirmação de Senha está diferente da informada';
+      end;
+   end;
+
+begin
+   Result := True;
+   lyAviso.Visible := False;
+
+   if not CampoInformados then
+      Exit(False);
+
+   if not SenhaConfirmada then
+      Exit(False);
+
+   try
+      LResponse := TClientUsuario.GetInstance.ValidarUsuario;
+      try
+         if LResponse.Code <> 200 then
+            raise Exception.Create(LResponse.Message);
+      finally
+         FreeAndNil(LResponse);
+      end;
+   except on E: Exception do
+      begin
+         Result := False;
+         lyAviso.Visible := True;
+         lbAviso.Text := E.Message;
+      end;
+   end;
+end;
+
+end.

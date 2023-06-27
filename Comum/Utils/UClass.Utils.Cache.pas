@@ -1,0 +1,108 @@
+unit UClass.Utils.Cache;
+
+interface
+
+uses
+  System.Classes,
+  System.SysUtils,
+  System.Generics.Collections;
+
+type
+  TTpCache = (chUsuario, chListaEndereco);
+
+  ICache = interface
+  ['{C299062A-C8BF-4C67-B5F3-FED2E9B136FE}']
+     procedure Add(aKey : String; aObj : TObject); overload;
+     procedure Remove(aKey : String); overload;
+      function Get(aKey : String) : TObject; overload;
+
+     procedure Add(aKey : TTpCache; aObj : TObject); overload;
+     procedure Remove(aKey : TTpCache); overload;
+      function Get(aKey : TTpCache) : TObject; overload;
+
+     procedure Clear;
+  end;
+
+  TCache = class(TInterfacedObject, ICache)
+  private class var FInstance : ICache;
+  private
+     FDic : TObjectDictionary<String,TObject>;
+
+     constructor CreatePrivate;
+  public
+     destructor Destroy; override;
+     class function GetInstance : ICache;
+
+     procedure Add(aKey : String; aObj : TObject); overload;
+     procedure Remove(aKey : String); overload;
+      function Get(aKey : String) : TObject; overload;
+
+     procedure Add(aKey : TTpCache; aObj : TObject); overload;
+     procedure Remove(aKey : TTpCache); overload;
+      function Get(aKey : TTpCache) : TObject; overload;
+
+     procedure Clear;
+  end;
+
+const ConstTpCache : array[TTpCache] of String = ('USUARIO','LIST-END');
+
+implementation
+
+{ TCache }
+
+procedure TCache.Add(aKey: String; aObj: TObject);
+begin
+   FDic.AddOrSetValue(aKey,aObj);
+end;
+
+procedure TCache.Add(aKey: TTpCache; aObj: TObject);
+begin
+   Add(ConstTpCache[aKey],aObj);
+end;
+
+procedure TCache.Clear;
+begin
+   FDic.Clear;
+end;
+
+constructor TCache.CreatePrivate;
+begin
+   FDic := TObjectDictionary<String,TObject>.Create([doOwnsValues]);
+end;
+
+destructor TCache.Destroy;
+begin
+   FreeAndNil(FDic);
+   inherited;
+end;
+
+function TCache.Get(aKey: String): TObject;
+begin
+   if not FDic.TryGetValue(aKey,Result) then
+      Result := nil;
+end;
+
+function TCache.Get(aKey: TTpCache): TObject;
+begin
+   Result := Get(ConstTpCache[aKey]);
+end;
+
+class function TCache.GetInstance: ICache;
+begin
+   if not Assigned(FInstance) then
+      FInstance := TCache.CreatePrivate;
+
+   Result := FInstance;
+end;
+
+procedure TCache.Remove(aKey: TTpCache);
+begin
+   Remove(ConstTpCache[aKey]);
+end;
+
+procedure TCache.Remove(aKey: String);
+begin
+   FDic.Remove(aKey);
+end;
+
+end.

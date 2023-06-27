@@ -1,0 +1,154 @@
+unit UClass.Controller.Config;
+
+interface
+
+uses System.IniFiles, System.SysUtils;
+
+type
+   IConfiguration = interface
+   ['{26AB7DA0-A323-4936-BD4E-AE8A7F2D464E}']
+      procedure SetPort(const Value: Integer);
+      function GetDataBase: String;
+      function GetPasswordDB: String;
+      function GetPort: Integer;
+      function GetUserDB: String;
+      function GetGoogleAPIKey: String;
+      procedure SetDataBase(const Value: String);
+      procedure SetPasswordDB(const Value: String);
+      procedure SetUserDB(const Value: String);
+      procedure SetGoogleAPIKey(const Value: String);
+
+      procedure Load;
+      procedure Save;
+
+      property Port : Integer read GetPort write SetPort;
+      property DataBase : String read GetDataBase write SetDataBase;
+      property UserDB : String read GetUserDB write SetUserDB;
+      property PasswordDB : String read GetPasswordDB write SetPasswordDB;
+      property GoogleAPIKey : String read GetGoogleAPIKey write SetGoogleAPIKey;
+   end;
+
+   TConfiguration = class(TInterfacedObject, IConfiguration)
+   strict private class var
+      FInstance : IConfiguration;
+   private
+      FPort : Integer;
+      FDataBase : String;
+      FUserDB : String;
+      FPasswordDB : String;
+      FGoogleAPIKey : String;
+      procedure SetPort(const Value: Integer);
+      function GetDataBase: String;
+      function GetPasswordDB: String;
+      function GetPort: Integer;
+      function GetUserDB: String;
+      function GetGoogleAPIKey: String;
+      procedure SetDataBase(const Value: String);
+      procedure SetPasswordDB(const Value: String);
+      procedure SetUserDB(const Value: String);
+      procedure SetGoogleAPIKey(const Value: String);
+
+   public
+      class function GetInstance : IConfiguration;
+
+      procedure Load;
+      procedure Save;
+
+      property Port : Integer read GetPort write SetPort;
+      property DataBase : String read GetDataBase write SetDataBase;
+      property UserDB : String read GetUserDB write SetUserDB;
+      property PasswordDB : String read GetPasswordDB write SetPasswordDB;
+   end;
+
+implementation
+
+{ TConfiguration }
+
+function TConfiguration.GetDataBase: String;
+begin
+   Result := FDataBase;
+end;
+
+function TConfiguration.GetGoogleAPIKey: String;
+begin
+   Result := FGoogleAPIKey;
+end;
+
+class function TConfiguration.GetInstance: IConfiguration;
+begin
+   if not Assigned(FInstance) then
+      FInstance := TConfiguration.Create;
+
+   Result := FInstance;
+end;
+
+function TConfiguration.GetPasswordDB: String;
+begin
+   Result := FPasswordDB;
+end;
+
+function TConfiguration.GetPort: Integer;
+begin
+   Result := FPort;
+end;
+
+function TConfiguration.GetUserDB: String;
+begin
+   Result := FUserDB;
+end;
+
+procedure TConfiguration.Load;
+var LArquivoINI : TIniFile;
+begin
+   LArquivoINI := TIniFile.Create(ExtractFileDir(GetCurrentDir)+'\Config.ini');
+   try
+      FPort         := LArquivoINI.ReadInteger('CONFIG','Port',8080);
+      FDataBase     := LArquivoINI.ReadString('CONFIG','DataBase','');
+      FUserDB       := LArquivoINI.ReadString('CONFIG','User','SYSDBA');
+      FPasswordDB   := LArquivoINI.ReadString('CONFIG','Password','masterkey');
+      FGoogleAPIKey := LArquivoINI.ReadString('CONFIG','GoogleAPIKey','');
+   finally
+      FreeAndNil(LArquivoINI);
+   end;
+end;
+
+procedure TConfiguration.Save;
+var LArquivoINI : TIniFile;
+begin
+   LArquivoINI := TIniFile.Create(ExtractFileDir(GetCurrentDir)+'\Config.ini');
+   try
+      LArquivoINI.WriteInteger('CONFIG','Port',FPort);
+      LArquivoINI.WriteString('CONFIG','DataBase',FDataBase);
+      LArquivoINI.WriteString('CONFIG','User',FUserDB);
+      LArquivoINI.WriteString('CONFIG','Password',FPasswordDB);
+   finally
+      FreeAndNil(LArquivoINI);
+   end;
+end;
+
+procedure TConfiguration.SetDataBase(const Value: String);
+begin
+   FDataBase := Value;
+end;
+
+procedure TConfiguration.SetGoogleAPIKey(const Value: String);
+begin
+   FGoogleAPIKey := Value;
+end;
+
+procedure TConfiguration.SetPasswordDB(const Value: String);
+begin
+   FPasswordDB := Value;
+end;
+
+procedure TConfiguration.SetPort(const Value: Integer);
+begin
+  FPort := Value;
+end;
+
+procedure TConfiguration.SetUserDB(const Value: String);
+begin
+   FUserDB := Value;
+end;
+
+end.

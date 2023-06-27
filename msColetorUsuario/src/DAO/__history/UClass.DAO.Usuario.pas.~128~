@@ -1,0 +1,238 @@
+unit UClass.DAO.Usuario;
+
+interface
+
+uses System.SysUtils,
+
+     Data.DB,
+     FireDAC.Comp.Client,
+     FireDAC.Stan.Param,
+
+     UClass.DAO.Base,
+     UClass.Model.Usuario,
+     UClass.Controller.Connection;
+
+type
+   TDAOUsuario = class(TDAOBase<TUsuario>)
+   private
+      function QueryToObject(aQuery : TFDQuery) : TUsuario;
+   public
+      constructor Create;
+
+      procedure ExecDDL; override;
+       function Insert(aModel : TUsuario) : Integer; override;
+      procedure Update(aModel : TUsuario); override;
+      procedure Delete(aModel : TUsuario); override;
+
+      function Usuario(aCodigo : Integer) : TUsuario; overload;
+      function Usuario(aLogin : String; aSenha : String = '') : TUsuario; overload;
+   end;
+
+implementation
+
+{ TDAOUsuario }
+
+constructor TDAOUsuario.Create;
+begin
+   FGenerator := 'GEN_USUARIO';
+end;
+
+procedure TDAOUsuario.Delete(aModel: TUsuario);
+var LQuery : TFDQuery;
+begin
+   inherited;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.ExecSQL('DELETE FROM USUARIO WHERE USU_CODIGO = %D',[aModel.Codigo]);
+
+         LQuery.Transaction.Commit;
+      except on E: Exception do
+         begin
+            LQuery.Transaction.Rollback;
+            raise Exception.Create('Erro ao Deletar Usuario: ' + E.Message);
+         end;
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+procedure TDAOUsuario.ExecDDL;
+begin
+  inherited;
+
+  with TConnection.GetInstance do
+  begin
+     CreateGeneretor(FGenerator);
+     CreateTable(
+        'USUARIO',
+        'CREATE TABLE USUARIO (                            '+
+        '   USU_CODIGO INTEGER,                            '+
+        '   CONSTRAINT PK_USUARIO PRIMARY KEY (USU_CODIGO) '+
+        ')                                                 '
+     );
+
+     CreateField(
+        'USUARIO',
+        'USU_EMAIL',
+        256,
+        'ALTER TABLE USUARIO ADD USU_EMAIL VARCHAR(300) NOT NULL,           '+
+        '                    ADD CONSTRAINT UK_USU_EMAIL UNIQUE (USU_EMAIL) '
+     );
+
+     CreateField(
+        'USUARIO',
+        'USU_CPF',
+        11,
+        'ALTER TABLE USUARIO ADD USU_CPF VARCHAR(11) NOT NULL,          '+
+        '                    ADD CONSTRAINT UK_USU_CPF UNIQUE (USU_CPF) '
+     );
+
+     CreateField(
+        'USUARIO',
+        'USU_SENHA',
+        40,
+        'ALTER TABLE USUARIO ADD USU_SENHA VARCHAR(40) NOT NULL'
+     );
+
+     CreateField(
+        'USUARIO',
+        'USU_TIPO',
+        1,
+        'ALTER TABLE USUARIO ADD USU_TIPO VARCHAR(1) DEFAULT ''R'' NOT NULL'
+     );
+  end;
+end;
+
+function TDAOUsuario.Insert(aModel: TUsuario): Integer;
+var LQuery : TFDQuery;
+begin
+   inherited;
+   Result := NextGenerator;
+
+   aModel.Codigo := Result;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Close;
+         LQuery.SQL.Clear;
+         LQuery.SQL.Text := ' INSERT INTO USUARIO (USU_CODIGO, USU_EMAIL, USU_CPF, USU_SENHA, USU_TIPO)      '+
+                            '              VALUES (:USU_CODIGO, :USU_EMAIL, :USU_CPF, :USU_SENHA, :USU_TIPO) ';
+         LQuery.ParamByName('USU_CODIGO').Value := ValueToVariant(aModel.Codigo);
+         LQuery.ParamByName('USU_EMAIL').Value  := ValueToVariant(aModel.Email);
+         LQuery.ParamByName('USU_CPF').Value    := ValueToVariant(aModel.CPF);
+         LQuery.ParamByName('USU_SENHA').Value  := ValueToVariant(aModel.Senha);
+         LQuery.ParamByName('USU_TIPO').Value   := ValueToVariant(ConstTipoUsuario[aModel.Tipo]);
+         LQuery.ExecSQL;
+
+         LQuery.Transaction.Commit;
+      except on E: Exception do
+         begin
+            LQuery.Transaction.Rollback;
+            raise Exception.Create('Erro ao Inserir Usuario: ' + E.Message);
+         end;
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+function TDAOUsuario.QueryToObject(aQuery: TFDQuery): TUsuario;
+begin
+   if aQuery.IsEmpty then
+      Exit(nil);
+
+   Result := TUsuario.Create;
+   Result.Codigo := aQuery.FieldByName('USU_CODIGO').AsInteger;
+   Result.Email  := aQuery.FieldByName('USU_EMAIL').AsString;
+   Result.CPF    := aQuery.FieldByName('USU_CPF').AsString;
+   Result.Senha  := aQuery.FieldByName('USU_SENHA').AsString;
+end;
+
+procedure TDAOUsuario.Update(aModel: TUsuario);
+var LQuery : TFDQuery;
+begin
+   inherited;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Close;
+         LQuery.SQL.Clear;
+         LQuery.SQL.Text := 'UPDATE USUARIO A                  '+
+                            '   SET A.USU_EMAIL = :USU_EMAIL,  '+
+                            '       A.USU_CPF = :USU_CPF,      '+
+                            '       A.USU_SENHA = :USU_SENHA   '+
+                            ' WHERE A.USU_CODIGO = :USU_CODIGO ';
+         LQuery.ParamByName('USU_EMAIL').Value  := ValueToVariant(aModel.Email);
+         LQuery.ParamByName('USU_CPF').Value    := ValueToVariant(aModel.CPF);
+         LQuery.ParamByName('USU_SENHA').Value  := ValueToVariant(aModel.Senha);
+         LQuery.ParamByName('USU_CODIGO').Value := ValueToVariant(aModel.Codigo);
+         LQuery.ExecSQL;
+
+         LQuery.Transaction.Commit;
+      except on E: Exception do
+         begin
+            LQuery.Transaction.Rollback;
+            raise Exception.Create('Erro ao Atualizar Usuario: ' + E.Message);
+         end;
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+function TDAOUsuario.Usuario(aLogin, aSenha: String): TUsuario;
+var LQuery : TFDQuery;
+    LWhere : String;
+begin
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LWhere := ' WHERE (USU_CPF = '+QuotedStr(aLogin)+' OR USU_EMAIL = '+QuotedStr(aLogin)+') ';
+
+         if not aSenha.IsEmpty then
+            LWhere := LWhere + ' AND USU_SENHA = ' + QuotedStr(aSenha);
+
+         LQuery.Close;
+         LQuery.SQL.Clear;
+         LQuery.SQL.Text := 'SELECT *       '+
+                            '  FROM USUARIO '+
+                            LWhere;
+         LQuery.Open;
+
+         Result := QueryToObject(LQuery);
+
+      except on E: Exception do
+         raise Exception.Create('Erro ao buscar Usuario: ' + E.Message);
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+function TDAOUsuario.Usuario(aCodigo: Integer): TUsuario;
+var LQuery : TFDQuery;
+begin
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Open('SELECT *                 '+
+                     '  FROM USUARIO           '+
+                     ' WHERE USU_CODIGO = :COD ',
+                     [aCodigo]);
+
+         Result := QueryToObject(LQuery);
+
+      except on E: Exception do
+         raise Exception.Create('Erro ao buscar Usuario: ' + E.Message);
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+end.

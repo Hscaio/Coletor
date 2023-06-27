@@ -1,0 +1,312 @@
+unit UClass.DAO.SolicitacaoColeta;
+
+interface
+
+uses System.SysUtils,
+     System.Generics.Collections,
+
+     Data.DB,
+     FireDAC.Comp.Client,
+     FireDAC.Stan.Param,
+
+     UClass.DAO.Base,
+     UClass.Model.SolicitacaoColeta,
+     UClass.Controller.Connection;
+
+type
+   TDAOSolicitacaoColeta = class(TDAOBase<TSolicitacaoColeta>)
+   private
+      function QueryToObject(aQuery : TFDQuery) : TSolicitacaoColeta;
+   public
+      constructor Create;
+
+      procedure ExecDDL; override;
+       function Insert(aModel : TSolicitacaoColeta) : Integer; override;
+      procedure Update(aModel : TSolicitacaoColeta); override;
+      procedure Delete(aModel : TSolicitacaoColeta); overload;
+       function Get(aCodigo : Integer) : TSolicitacaoColeta; override;
+
+      function EnderecoPossuiColeta(aEndereco : Integer) : Boolean;
+      function HistoricoUsuario(aCodUsurio : Integer): TObjectList<TSolicitacaoColeta>;
+      function HistoricoColetor(aCodColetor : Integer): TObjectList<TSolicitacaoColeta>;
+   end;
+
+implementation
+
+{ TDAOSolicitacaoColeta }
+
+constructor TDAOSolicitacaoColeta.Create;
+begin
+   FGenerator := 'GEN_SOLCOLETA';
+end;
+
+procedure TDAOSolicitacaoColeta.Delete(aModel: TSolicitacaoColeta);
+var LQuery : TFDQuery;
+begin
+   inherited;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.ExecSQL('DELETE FROM SOLICITACAO_COLETA WHERE SCO_CODIGO = :COD',[aModel.Codigo]);
+
+         LQuery.Transaction.Commit;
+      except on E: Exception do
+         begin
+            LQuery.Transaction.Rollback;
+            raise Exception.Create('Erro ao Deletar Solicitação de Coleta: ' + E.Message);
+         end;
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+function TDAOSolicitacaoColeta.EnderecoPossuiColeta(
+  aEndereco: Integer): Boolean;
+var LQuery : TFDQuery;
+begin
+   inherited;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Open('SELECT FIRST 1 1 FROM SOLICITACAO_COLETA WHERE SCO_ENDERECO = :COD',[aEndereco]);
+         Result := not LQuery.IsEmpty;
+      except on E: Exception do
+         raise Exception.Create('Erro ao consultar se endereço possui Solicitação de Coleta: ' + E.Message);
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+procedure TDAOSolicitacaoColeta.ExecDDL;
+begin
+  inherited;
+  with TConnection.GetInstance do
+  begin
+     CreateGeneretor(FGenerator);
+     CreateTable(
+        'SOLICITACAO_COLETA',
+        'CREATE TABLE SOLICITACAO_COLETA (                    '+
+        '   SCO_CODIGO INTEGER,                               '+
+        '   CONSTRAINT PK_SOL_COLETA PRIMARY KEY (SCO_CODIGO) '+
+        ')                                                    '
+     );
+
+     CreateField(
+        'SOLICITACAO_COLETA',
+        'SCO_ENDERECO',
+        'ALTER TABLE SOLICITACAO_COLETA ADD SCO_ENDERECO INTEGER NOT NULL,                                                        '+
+        '                               ADD CONSTRAINT FK_SOL_COL_END FOREIGN KEY (SCO_ENDERECO) REFERENCES ENDERECO (END_CODIGO) '
+     );
+
+     CreateField(
+        'SOLICITACAO_COLETA',
+        'SCO_STATUS',
+        1,
+        'ALTER TABLE SOLICITACAO_COLETA ADD SCO_STATUS VARCHAR(1) NOT NULL'
+     );
+
+     CreateField(
+        'SOLICITACAO_COLETA',
+        'SCO_DH_CADASTRO',
+        'ALTER TABLE SOLICITACAO_COLETA ADD SCO_DH_CADASTRO TIMESTAMP NOT NULL'
+     );
+
+     CreateField(
+        'SOLICITACAO_COLETA',
+        'SCO_AVALIACAO',
+        'ALTER TABLE SOLICITACAO_COLETA ADD SCO_AVALIACAO SMALLINT'
+     );
+
+     CreateField(
+        'SOLICITACAO_COLETA',
+        'SCO_COMENTARIO',
+        200,
+        'ALTER TABLE SOLICITACAO_COLETA ADD SCO_COMENTARIO VARCHAR(200)'
+     );
+
+     CreateField(
+        'SOLICITACAO_COLETA',
+        'SCO_COLETOR',
+        'ALTER TABLE SOLICITACAO_COLETA ADD SCO_COLETOR INTEGER,                                                            '+
+        '                               ADD CONSTRAINT FK_SOL_USU FOREIGN KEY (SCO_COLETOR) REFERENCES USUARIO (USU_CODIGO) '
+     );
+
+     CreateField(
+        'SOLICITACAO_COLETA',
+        'SCO_LOG_ENDERECO',
+        250,
+        'ALTER TABLE SOLICITACAO_COLETA ADD SCO_LOG_ENDERECO VARCHAR(250)'
+     );
+
+     CreateField(
+        'SOLICITACAO_COLETA',
+        'SCO_LOG_BAIRRO',
+        250,
+        'ALTER TABLE SOLICITACAO_COLETA ADD SCO_LOG_BAIRRO VARCHAR(250)'
+     );
+
+  end;
+end;
+
+function TDAOSolicitacaoColeta.Get(aCodigo: Integer): TSolicitacaoColeta;
+var LQuery : TFDQuery;
+begin
+   Result := nil;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Open('SELECT *                  '+
+                     '  FROM SOLICITACAO_COLETA '+
+                     ' WHERE SCO_CODIGO = :COD  ',
+                     [aCodigo]);
+
+         if LQuery.IsEmpty then
+            Exit;
+
+         Result := QueryToObject(LQuery);
+      except on E: Exception do
+         raise Exception.Create('Erro ao buscar Solicitação de Coleta: ' + E.Message);
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+function TDAOSolicitacaoColeta.HistoricoColetor(
+  aCodColetor: Integer): TObjectList<TSolicitacaoColeta>;
+var LQuery : TFDQuery;
+begin
+   Result := TObjectList<TSolicitacaoColeta>.Create;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Open('SELECT A.*                   '+
+                     '  FROM SOLICITACAO_COLETA A  '+
+                     ' WHERE A.SCO_COLETOR = :COD  '+
+                     '   AND A.SCO_STATUS <> ''P'' ',
+                     [aCodColetor]);
+
+         LQuery.First;
+         while not LQuery.Eof do
+         begin
+            Result.Add(QueryToObject(LQuery));
+            LQuery.Next;
+         end;
+      except on E: Exception do
+         raise Exception.Create('Erro ao buscar histórico do coletor: ' + E.Message);
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+function TDAOSolicitacaoColeta.HistoricoUsuario(
+  aCodUsurio: Integer): TObjectList<TSolicitacaoColeta>;
+begin
+
+end;
+
+function TDAOSolicitacaoColeta.Insert(aModel: TSolicitacaoColeta): Integer;
+var LQuery : TFDQuery;
+begin
+   inherited;
+   Result := NextGenerator;
+
+   aModel.Codigo := Result;
+   aModel.DHCadastro := Now;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Close;
+         LQuery.SQL.Clear;
+         LQuery.SQL.Text := ' INSERT INTO SOLICITACAO_COLETA (SCO_CODIGO, SCO_ENDERECO, SCO_STATUS, SCO_DH_CADASTRO, SCO_AVALIACAO, SCO_COMENTARIO, SCO_COLETOR, SCO_LOG_ENDERECO, SCO_LOG_BAIRRO)           '+
+                            '                         VALUES (:SCO_CODIGO, :SCO_ENDERECO, :SCO_STATUS, CURRENT_TIMESTAMP, :SCO_AVALIACAO, :SCO_COMENTARIO, :SCO_COLETOR, :SCO_LOG_ENDERECO, :SCO_LOG_BAIRRO) ';
+         LQuery.ParamByName('SCO_CODIGO').Value       := ValueToVariant(aModel.Codigo);
+         LQuery.ParamByName('SCO_ENDERECO').Value     := ValueToVariant(aModel.Endereco);
+         LQuery.ParamByName('SCO_STATUS').Value       := ConstStatusSolicitacaoColeta[aModel.Status];
+         LQuery.ParamByName('SCO_AVALIACAO').Value    := ValueToVariant(aModel.Avalicao);
+         LQuery.ParamByName('SCO_COMENTARIO').Value   := ValueToVariant(aModel.Comentario);
+         LQuery.ParamByName('SCO_COLETOR').Value      := ValueToVariant(aModel.Coletor);
+         LQuery.ParamByName('SCO_LOG_ENDERECO').Value := ValueToVariant(aModel.LogEndereco);
+         LQuery.ParamByName('SCO_LOG_BAIRRO').Value   := ValueToVariant(aModel.LogBairro);
+         LQuery.ExecSQL;
+
+         LQuery.Transaction.Commit;
+      except on E: Exception do
+         begin
+            LQuery.Transaction.Rollback;
+            raise Exception.Create('Erro ao Inserir Solicitação de Coleta: ' + E.Message);
+         end;
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+function TDAOSolicitacaoColeta.QueryToObject(
+  aQuery: TFDQuery): TSolicitacaoColeta;
+begin
+   if aQuery.IsEmpty then
+      Exit(nil);
+
+   Result := TSolicitacaoColeta.Create;
+   Result.Codigo      := aQuery.FieldByName('SCO_CODIGO').AsInteger;
+   Result.Endereco    := aQuery.FieldByName('SCO_ENDERECO').AsInteger;
+   Result.Status      := StrToStatusSolicitacaoColeta(aQuery.FieldByName('SCO_STATUS').AsString);
+   Result.DHCadastro  := aQuery.FieldByName('SCO_DH_CADASTRO').AsDateTime;
+   Result.Avalicao    := aQuery.FieldByName('SCO_AVALIACAO').AsInteger;
+   Result.Comentario  := aQuery.FieldByName('SCO_COMENTARIO').AsString;
+   Result.Coletor     := aQuery.FieldByName('SCO_COLETOR').AsInteger;
+   Result.LogEndereco := aQuery.FieldByName('SCO_LOG_ENDERECO').AsString;
+   Result.LogBairro   := aQuery.FieldByName('SCO_LOG_BAIRRO').AsString;
+end;
+
+procedure TDAOSolicitacaoColeta.Update(aModel: TSolicitacaoColeta);
+var LQuery : TFDQuery;
+begin
+   inherited;
+
+   LQuery := TConnection.GetInstance.NewQuery;
+   try
+      try
+         LQuery.Close;
+         LQuery.SQL.Clear;
+         LQuery.SQL.Text := 'UPDATE SOLICITACAO_COLETA A                    '+
+                            '   SET A.SCO_ENDERECO = :SCO_ENDERECO,         '+
+                            '       A.SCO_STATUS = :SCO_STATUS,             '+
+                            '       A.SCO_AVALIACAO = :SCO_AVALIACAO,       '+
+                            '       A.SCO_COMENTARIO = :SCO_COMENTARIO,     '+
+                            '       A.SCO_COLETOR = :SCO_COLETOR,           '+
+                            '       A.SCO_LOG_ENDERECO = :SCO_LOG_ENDERECO, '+
+                            '       A.SCO_LOG_BAIRRO = :SCO_LOG_BAIRRO      '+
+                            ' WHERE A.SCO_CODIGO = :SCO_CODIGO              ';
+         LQuery.ParamByName('SCO_CODIGO').Value        := ValueToVariant(aModel.Codigo);
+         LQuery.ParamByName('SCO_ENDERECO').Value      := ValueToVariant(aModel.Endereco);
+         LQuery.ParamByName('SCO_STATUS').Value        := ConstStatusSolicitacaoColeta[aModel.Status];
+         LQuery.ParamByName('SCO_AVALIACAO').Value     := ValueToVariant(aModel.Avalicao);
+         LQuery.ParamByName('SCO_COMENTARIO').Value    := ValueToVariant(aModel.Comentario);
+         LQuery.ParamByName('SCO_COLETOR').Value       := ValueToVariant(aModel.Coletor);
+         LQuery.ParamByName('SCO_LOG_ENDERECO').Value  := ValueToVariant(aModel.LogEndereco);
+         LQuery.ParamByName('SCO_LOG_BAIRRO').Value    := ValueToVariant(aModel.LogBairro);
+         LQuery.ExecSQL;
+
+         LQuery.Transaction.Commit;
+      except on E: Exception do
+         begin
+            LQuery.Transaction.Rollback;
+            raise Exception.Create('Erro ao Atualizar Solicitação de Coleta: ' + E.Message);
+         end;
+      end;
+   finally
+      FreeAndNil(LQuery);
+   end;
+end;
+
+end.

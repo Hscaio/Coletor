@@ -1,0 +1,39 @@
+program msColetorUsuario;
+
+uses
+  Vcl.SvcMgr,
+  Vcl.Forms,
+  UClass.Service.ColetorUsuario in 'Service\UClass.Service.ColetorUsuario.pas' {ColetorUsuario: TService},
+  UClass.View.Dashboard in 'View\UClass.View.Dashboard.pas' {frmDashboard};
+
+{$R *.RES}
+
+begin
+  // Windows 2003 Server requires StartServiceCtrlDispatcher to be
+  // called before CoRegisterClassObject, which can be called indirectly
+  // by Application.Initialize. TServiceApplication.DelayInitialize allows
+  // Application.Initialize to be called from TService.Main (after
+  // StartServiceCtrlDispatcher has been called).
+  //
+  // Delayed initialization of the Application object may affect
+  // events which then occur prior to initialization, such as
+  // TService.OnCreate. It is only recommended if the ServiceApplication
+  // registers a class object with OLE and is intended for use with
+  // Windows 2003 Server.
+  //
+  // Application.DelayInitialize := True;
+  //
+  if (ParamStr(1) = 'app') or (System.DebugHook = 2) then
+  begin
+     Vcl.Forms.Application.Initialize;
+     Vcl.Forms.Application.CreateForm(TfrmDashboard, frmDashboard);
+     Vcl.Forms.Application.Run;
+  end
+  else
+  begin
+     if (not Vcl.SvcMgr.Application.DelayInitialize) or Vcl.SvcMgr.Application.Installing then
+        Vcl.SvcMgr.Application.Initialize;
+      Vcl.SvcMgr.Application.CreateForm(TColetorUsuario, ColetorUsuario);
+      Vcl.SvcMgr.Application.Run;
+  end;
+end.

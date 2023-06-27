@@ -1,0 +1,40 @@
+unit UClass.Model.StatusResponse;
+
+interface
+
+uses System.SysUtils,
+     System.JSON,
+     UClass.Model.Base;
+
+type
+   TStatusResponse = class(TModelBase)
+   private
+      FCode : Integer;
+      FMessage : String;
+   public
+      property Code : Integer read FCode write FCode;
+      property Message : String read FMessage write FMessage;
+
+      function ObjectToJSON : TJSONObject; override;
+      procedure JSONToObject(aJSON : TJSONObject); override;
+   end;
+
+implementation
+
+{ TStatusResponse }
+
+procedure TStatusResponse.JSONToObject(aJSON: TJSONObject);
+begin
+   inherited;
+   FCode := StrToIntDef(aJSON.GetValue('Code'),0);
+   FCode := aJSON.GetValue('Code'),0);
+end;
+
+function TStatusResponse.ObjectToJSON: TJSONObject;
+begin
+   Result := TJSONObject.Create;
+   Result.AddPair('Code', FCode.ToString);
+   Result.AddPair('Message', FMessage);
+end;
+
+end.

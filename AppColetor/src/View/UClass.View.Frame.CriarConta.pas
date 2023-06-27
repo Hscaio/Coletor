@@ -1,0 +1,205 @@
+unit UClass.View.Frame.CriarConta;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  UClass.Utils.Frame, FMX.Edit, FMX.Objects, FMX.Controls.Presentation,
+  FMX.Layouts, UClass.Utils.Notificacao, System.Threading, UClass.Model.Usuario,
+  System.Hash;
+
+type
+  TfrmCriarConta = class(TFrameUtil)
+    recFundoLogin: TRectangle;
+    lyBot: TLayout;
+    lyCriarConta: TLayout;
+    rcCriarConta: TRectangle;
+    lbProximo: TLabel;
+    lyMenu: TLayout;
+    imgBack: TImage;
+    lyTop: TLayout;
+    lyLogo: TLayout;
+    lbEntrar: TLabel;
+    lyEmail: TLayout;
+    rcEmail: TRectangle;
+    edEmail: TEdit;
+    lySenha: TLayout;
+    rcSenha: TRectangle;
+    edSenha: TEdit;
+    lyConfirmarSenha: TLayout;
+    rcConfirmarSenha: TRectangle;
+    edConfirmarSenha: TEdit;
+    lyCPF: TLayout;
+    rcCPF: TRectangle;
+    edCPF: TEdit;
+    lyTermos: TLayout;
+    lbTermos: TLabel;
+    procedure edCPFTyping(Sender: TObject);
+    procedure imgBackClick(Sender: TObject);
+    procedure lyCriarContaClick(Sender: TObject);
+  private
+    { Private declarations }
+     FTipoUsu : TTipoUsuario;
+     function ValidarDados : Boolean;
+     function CadstrarUsuario : Boolean;
+  public
+    { Public declarations }
+    property TipoUsu : TTipoUsuario read FTipoUsu write FTipoUsu;
+  end;
+
+var
+  frmCriarConta: TfrmCriarConta;
+
+implementation
+
+{$R *.fmx}
+
+uses UClass.Utils.Format,
+     UClass.Client.Usuario,
+     UClass.Model.Response, UClass.Utils.MainScreen,
+     UClass.View.Frame.Login, UClass.View.Frame.Endereco, UClass.Utils.Cache;
+
+function TfrmCriarConta.CadstrarUsuario : Boolean;
+var LResponse : TResponse<TUsuario>;
+    LUsuario : TUsuario;
+begin
+   Result := False;
+
+   try
+      LResponse := nil;
+      LUsuario := TUsuario.Create;
+      try
+         LUsuario.Email := edEmail.Text;
+         LUsuario.CPF := edCPF.Text;
+         LUsuario.Senha := THashSHA1.GetHashString(edSenha.Text);
+         LUsuario.Tipo := FTipoUsu;
+
+         LResponse := TClientUsuario.GetInstance.NovoUsuario(LUsuario);
+         if LResponse.Status.Code <> 200 then
+            raise Exception.Create(LResponse.Status.Message);
+
+         TCache.GetInstance.Add('USUARIO',LResponse.Data);
+         Result := True;
+      finally
+         FreeAndNil(LUsuario);
+
+         if Assigned(LResponse) then
+            FreeAndNil(LResponse);
+      end;
+   except on E: Exception do
+      begin
+         TThread.Synchronize(TThread.CurrentThread,
+            procedure
+            begin
+               TDialoger.GetInstance.ShowMessage(E.Message,mtError);
+            end
+         );
+      end;
+   end;
+end;
+
+procedure TfrmCriarConta.edCPFTyping(Sender: TObject);
+begin
+   inherited;
+   Formatar(Sender,TFormato.CPF);
+end;
+
+procedure TfrmCriarConta.imgBackClick(Sender: TObject);
+begin
+   inherited;
+   TMainScreen.GetInstance.Show<TfrmLogin>(nil);
+end;
+
+procedure TfrmCriarConta.lyCriarContaClick(Sender: TObject);
+var LTask : ITask;
+begin
+   inherited;
+   TDialoger.GetInstance.ShowLoad;
+   LTask := TTask.Run(
+      procedure
+      var LfrmEndereco : TfrmEndereco;
+      begin
+         try
+            if not ValidarDados then
+               Exit;
+
+            if not CadstrarUsuario then
+               Exit;
+
+            TThread.Synchronize(TThread.CurrentThread,
+               procedure
+               begin
+                  TDialoger.GetInstance.ToastMessage('Usuário cadastrado com sucesso!');
+                  LfrmEndereco := TfrmEndereco.Create(nil);
+                  TMainScreen.GetInstance.Show<TfrmEndereco>(LfrmEndereco);
+               end
+            );
+         finally
+            TThread.Synchronize(TThread.CurrentThread,
+               procedure
+               begin
+                  TDialoger.GetInstance.HideLoad;
+               end
+            );
+         end;
+      end
+   );
+end;
+
+function TfrmCriarConta.ValidarDados : Boolean;
+
+   function CampoInformados : Boolean;
+   begin
+      Result := True;
+
+      if CampoIsEmpty(edEmail,rcEmail) then
+         Result := False;
+
+      if CampoIsEmpty(edCPF,rcCPF) then
+         Result := False;
+
+      if CampoIsEmpty(edSenha,rcSenha) then
+         Result := False;
+
+      if CampoIsEmpty(edConfirmarSenha,rcConfirmarSenha) then
+         Result := False;
+
+      if not Result then
+      begin
+         TDialoger.GetInstance.ShowMessage('Há dados obrigatórios não informados',mtError);
+         Exit;
+      end;
+
+      if edSenha.Text.Length < 5 then
+      begin
+         TDialoger.GetInstance.ShowMessage('A senha deve conter no mínimo 5 caracteres',mtError);
+         Result := False;
+      end;
+
+   end;
+
+   function SenhaConfirmada : Boolean;
+   begin
+      Result := edSenha.Text = edConfirmarSenha.Text;
+
+      CampoInvalido(edSenha,rcSenha,Result);
+      CampoInvalido(edConfirmarSenha,rcConfirmarSenha,Result);
+
+      if not Result then
+         TDialoger.GetInstance.ShowMessage('Confirmação de Senha está diferente da informada',mtError);
+   end;
+
+begin
+   Result := False;
+
+   if not CampoInformados then
+      Exit;
+
+   if not SenhaConfirmada then
+      Exit;
+
+   Result := True;;
+end;
+
+end.

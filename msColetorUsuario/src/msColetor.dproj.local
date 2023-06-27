@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2021/11/21 03:00:08.000.577,=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2021/11/21 03:02:21.000.734,=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2022/10/04 20:22:18.000.695,=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2022/10/04 20:24:03.000.191,D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Service\UClass.Service.msColetorUsuario.pas=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2022/10/04 20:24:03.000.191,D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Service\UClass.Service.msColetorUsuario.dfm=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Unit3.dfm</Transaction>
+    <Transaction>2022/10/04 20:24:49.000.879,D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Service\UClass.Service.ColetorUsuario.pas=D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Service\UClass.Service.msColetorUsuario.pas</Transaction>
+    <Transaction>2022/10/04 20:24:49.000.879,D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Service\UClass.Service.ColetorUsuario.dfm=D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Service\UClass.Service.msColetorUsuario.dfm</Transaction>
+    <Transaction>2022/10/04 20:24:57.000.764,D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\msColetorUsuario.dproj=C:\Users\caios\OneDrive\Documents\Embarcadero\Studio\Projects\Project2.dproj</Transaction>
+    <Transaction>2022/10/04 20:32:04.000.966,=D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\View\UClass.View.Dashboard.pas</Transaction>
+    <Transaction>2022/10/04 21:37:14.148,D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\msColetor.dproj=D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\msColetorUsuario.dproj</Transaction>
+    <Transaction>2022/10/04 21:37:39.271,D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Service\UClass.Service.Coletor.pas=D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Service\UClass.Service.ColetorUsuario.pas</Transaction>
+    <Transaction>2022/10/04 21:37:39.271,D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Service\UClass.Service.Coletor.dfm=D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Service\UClass.Service.ColetorUsuario.dfm</Transaction>
+    <Transaction>2022/10/04 21:37:56.938,=D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Unit1.pas</Transaction>
+    <Transaction>2022/10/04 21:38:54.515,D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Controller\UClass.Controller.Conneciotn.pas=D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Unit1.pas</Transaction>
+    <Transaction>2022/10/04 21:39:07.002,D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Controller\UClass.Controller.Connection.pas=D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Controller\UClass.Controller.Conneciotn.pas</Transaction>
+    <Transaction>2022/10/04 21:39:27.988,=D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Unit1.pas</Transaction>
+    <Transaction>2022/10/04 21:39:45.773,D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Controller\UClass.Controller.Config.pas=D:\Desenvolvimento\Delphi\Coletor v2\msColetorUsuario\src\Unit1.pas</Transaction>
+  </Transactions>
+</BorlandProject>
